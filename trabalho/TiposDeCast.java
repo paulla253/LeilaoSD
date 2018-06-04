@@ -13,6 +13,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     JChannel canalDeComunicacao;
     MessageDispatcher  despachante;
     final int TAMANHO_MINIMO_CLUSTER = 2;
+    boolean CONTINUE=true;
 
     public static void main(String[] args) throws Exception {
         new TiposDeCast().start();
@@ -21,13 +22,10 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     private void start() throws Exception {
 
         //Cria o canal de comunicação com uma configuração padrão do JGroups
-	canalDeComunicacao=new JChannel();
-	//canalDeComunicacao=new JChannel("udp.xml");
-	//canalDeComunicacao=new JChannel("sequencer.xml");
+	    canalDeComunicacao=new JChannel();
+        canalDeComunicacao.setReceiver(this);
 
         despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);
-
-        canalDeComunicacao.setReceiver(this);	//quem irá lidar com as mensagens recebidas
 
         canalDeComunicacao.connect("TiposDeCast");
            eventLoop();
@@ -67,28 +65,27 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
                     if(teste.getValue(cluster.elementAt(i)).equals("y"))
                     {
                         grupo.add(cluster.elementAt(i));
-
                     }
                 }
 
-                RspList leilao=enviaAnycast( grupo, "O leilao vai comecar, qual o valor inicial?" );
+                enviaAnycastNone( grupo, "O leilao vai comecar, qual o valor inicial?" );
 
-                float valor=0;
-
-                for (int i = 0; i < grupo.size(); i++){
-
-                    String txt = (String)leilao.getValue(grupo.elementAt(i));
-
-                    float new_valor= Float.parseFloat(txt);
-
-                    if(valor < new_valor)
-                    {
-                        valor=new_valor;
-                    }
-
-                }
-
-                System.out.println("Maior valor de "+valor);
+//                float valor=0;
+//
+//                for (int i = 0; i < grupo.size(); i++){
+//
+//                    String txt = (String)leilao.getValue(grupo.elementAt(i));
+//
+//                    float new_valor= Float.parseFloat(txt);
+//
+//                    if(valor < new_valor)
+//                    {
+//                        valor=new_valor;
+//                    }
+//
+//                }
+//
+//                System.out.println("Maior valor de "+valor);
 
                 while(true){ Util.sleep(100); }
 
@@ -100,12 +97,30 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 
 
         } // if primeiro
-        else{
-            while( canalDeComunicacao.getView().getMembers().contains(primeiroMembro) )
+        else {
+            while (canalDeComunicacao.getView().getMembers().contains(primeiroMembro) && CONTINUE) {
+
                 Util.sleep(100); // aguarda o primeiro membro sair do cluster
 
-            System.out.println("\nBye bye...");
+            }
+                System.out.println("Depois de entrar no leilao!");
+
+                Scanner teclado = new Scanner(System.in);
+                String line = "";
+                line=teclado.nextLine().toLowerCase();
+
+                try {
+                    enviaUnicast(primeiroMembro, line);
+
+
+                }catch(Exception e) {
+                        System.err.println( "ERRO: " + e.toString() );
+                    }
+
+
         }
+            System.out.println("\nBye bye...");
+
     }
 
     private RspList enviaMulticast(String conteudo) throws Exception{
@@ -139,24 +154,24 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         return respList;
     }
 
-    //    private void enviaAnycastNone(Collection<Address> grupo, String conteudo) throws Exception{
-//        System.out.println("\nENVIEI a pergunta: " + conteudo);
-//
-//        Message mensagem=new Message(null, "{ ANYCAST } " + conteudo); //apesar do endereço ser null, se as opcoes contiverem anycasting==true enviará somente aos destinos listados
-//
-//        RequestOptions opcoes = new RequestOptions();
-//        opcoes.setMode(ResponseMode.none); // espera receber a resposta da maioria do grupo (ALL, MAJORITY, FIRST, NONE)
-//        opcoes.setAnycasting(true);
-//
-//        System.out.println("Não precisa de resposta");
-//
-////        return respList;
-//    }
+        private void enviaAnycastNone(Collection<Address> grupo, String conteudo) throws Exception{
+        System.out.println("\nENVIEI a pergunta: " + conteudo);
+
+        Message mensagem=new Message(null, "{ ANYCAST } " + conteudo); //apesar do endereço ser null, se as opcoes contiverem anycasting==true enviará somente aos destinos listados
+
+        RequestOptions opcoes = new RequestOptions();
+        opcoes.setMode(ResponseMode.GET_NONE); // espera receber a resposta da maioria do grupo (ALL, MAJORITY, FIRST, NONE)
+        opcoes.setAnycasting(true);
+
+        System.out.println("Não precisa de resposta");
+
+        despachante.castMessage(grupo, mensagem, opcoes); //ANYCAST
+    }
 
     private String enviaUnicast(Address destino, String conteudo) throws Exception{
         System.out.println("\nENVIEI a pergunta: " + conteudo);
 
-        Message mensagem=new Message(destino, "{ UNICAST } " + conteudo);
+        Message mensagem=new Message(destino, "Lance:" + conteudo);
 
         RequestOptions opcoes = new RequestOptions();
           opcoes.setMode(ResponseMode.GET_FIRST); // não espera receber a resposta do destino (ALL, MAJORITY, FIRST, NONE)
@@ -169,6 +184,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 
     public void receive(Message msg) { //exibe mensagens recebidas
 
+//        System.out.println(msg.getSrc() + ": " + msg.getObject());
 
         System.out.println("" + msg.getSrc() + ": " + msg.getObject());
     }
@@ -181,6 +197,8 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         String line = "";
 
         line=teclado.nextLine().toLowerCase();
+
+        CONTINUE=false;
 
         return line;
     }
