@@ -7,6 +7,12 @@
 import org.jgroups.*;
 import org.jgroups.blocks.*;
 import org.jgroups.util.*;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.*;
 
 
@@ -17,6 +23,8 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     final int TAMANHO_MINIMO_CLUSTER = 2;
     boolean CONTINUE=true;
     float NOVO_LANCE=0;
+    String nickname="";
+    
 
     public static void main(String[] args) throws Exception {
         new TiposDeCast().start();
@@ -36,13 +44,49 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     }
 
     private void eventLoop() {
+    	
+    	loadNickname();
+    	
+    	
         //tamanho do grupo, para começar o leilao.
         while( canalDeComunicacao.getView().size() < TAMANHO_MINIMO_CLUSTER )
           Util.sleep(100); // aguarda os membros se juntarem ao cluster
-
         criaSalaDeLeilao();
 
     }
+    
+    private void loadNickname(){ 
+
+        File nicknameFile = new File("nickname.txt");
+        
+        if(!nicknameFile.exists()){
+          System.out.print("Escolha seu nickname: ");
+  	    	Scanner teclado = new Scanner(System.in);
+	      	System.out.print("Lance :");
+          
+	        nickname = teclado.nextLine();
+	        System.out.println();
+          try{
+            BufferedWriter auxout = new BufferedWriter(new FileWriter(nicknameFile));
+            auxout.append(nickname);
+            auxout.close();
+          }catch(Exception e){
+
+          } 
+        }else{
+              try{
+                  FileReader arq = new FileReader(nicknameFile);
+                  BufferedReader lerArq = new BufferedReader(arq);
+                  this.nickname = lerArq.readLine();
+                  arq.close();
+          }catch(Exception e){
+
+          }
+          
+        }
+      }
+    
+    
     private void criaSalaDeLeilao(){
         Address meuEndereco = canalDeComunicacao.getAddress();
 
@@ -76,7 +120,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
                     }
                 }
                 
-                float lance=10;
+                float lance=0;
                 
                 int cont=0;
                 
@@ -92,7 +136,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 	                	if(NOVO_LANCE>lance)
 	                	{
 	                		lance=NOVO_LANCE;
-	                		System.out.println("Valor atualizado: "+lance);
+	                		System.out.println("Objeto esta com o valor: "+lance);
 		                	cont=0;
 	                	}
 	                	
