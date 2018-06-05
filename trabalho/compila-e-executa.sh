@@ -7,7 +7,9 @@ CONFIG="-Djava.net.preferIPv4Stack=true"
 LIBS=../lib/jgroups-3.6.4.Final.jar:./
 export CLASSPATH=$CLASSPATH:$LIBS
 
+javac Protocolo.java
 javac TiposDeCast.java
+
 
 RUN_CMD="java $CONFIG -cp $LIBS TiposDeCast 2>/dev/null"
 echo "$RUN_CMD"

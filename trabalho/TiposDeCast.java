@@ -2,11 +2,13 @@
  SAIBA MAIS: http://www.jgroups.org/manual/html/user-building-blocks.html#MessageDispatcher
 /**/
 
+
+//import Protocolo;
 import org.jgroups.*;
 import org.jgroups.blocks.*;
 import org.jgroups.util.*;
-
 import java.util.*;
+
 
 public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 
@@ -14,6 +16,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     MessageDispatcher  despachante;
     final int TAMANHO_MINIMO_CLUSTER = 2;
     boolean CONTINUE=true;
+    float NOVO_LANCE=0;
 
     public static void main(String[] args) throws Exception {
         new TiposDeCast().start();
@@ -39,8 +42,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 
         criaSalaDeLeilao();
 
-    }//eventLoop
-
+    }
     private void criaSalaDeLeilao(){
         Address meuEndereco = canalDeComunicacao.getAddress();
 
@@ -50,15 +52,21 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         if( meuEndereco.equals(primeiroMembro) ) {  // somente o primeiro membro envia o teste abaixo
 
             try {
-                //resposta está em teste.
-                RspList teste=enviaMulticast( "Quem quer participar do leilao de uma caneta?" ); //envia multicast para todos
-
+                Protocolo prot = new Protocolo();
+                prot.setConteudo("Quem quer participar do leilao de uma caneta?");
+                prot.setResposta(true);
+                
+                RspList teste=enviaMulticast(prot); //envia multicast para todos
+                
                 //debug das respostas com ID e valor
                 for (int i = 0; i < cluster.size(); i++){
-                    System.out.println("ID : "+cluster.elementAt(i)+" Valor:"+teste.getValue(cluster.elementAt(i)));
+                	
+                	prot = (Protocolo)teste.getValue(cluster.elementAt(i));
+                	
+                    System.out.println("ID : "+cluster.elementAt(i)+" Valor:"+prot.getConteudo());
                 }
 
-                //criando grupo para os que responderam y
+                //cria grupo para os que responderam y
                 Vector<Address> grupo = new Vector<Address>();
                 for (int i = 0; i < cluster.size(); i++){
 
@@ -67,8 +75,57 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
                         grupo.add(cluster.elementAt(i));
                     }
                 }
+                
+                float lance=10;
+                
+                int cont=0;
+                
+                //leilão acontencendo.
+                boolean flag=true;             
+                while(flag){ 
+                	
+                	Util.sleep(5000); 
+                	
+            		//System.out.println("--: "+NOVO_LANCE);
+	                if(NOVO_LANCE>0)
+	                {
+	                	if(NOVO_LANCE>lance)
+	                	{
+	                		lance=NOVO_LANCE;
+	                		System.out.println("Valor atualizado: "+lance);
+		                	cont=0;
+	                	}
+	                	
+	                	NOVO_LANCE=0;
 
-                enviaAnycastNone( grupo, "O leilao vai comecar, qual o valor inicial?" );
+	                }
+	                //depois de um tempo, não aconteceu nenhum lance.
+	                else {
+	                	
+	                	if(cont==3)
+	                	{
+	                		flag=false;
+	                		
+	                	}
+	                	
+	                	cont++;
+	                	
+	                    prot.setConteudo("o leilao vai acabar em "+cont);
+	                    prot.setResposta(false);
+	                    prot.setTipo(0);;
+	                    enviaAnycastNone( grupo,prot);
+	                }
+	                
+	                
+                }
+                
+                
+                System.out.println("Leilao ganho com valor: "+lance);
+                
+                //prot.setConteudo("O leilao vai comecar, qual o valor inicial?");
+                //prot.setResposta(false);
+
+               //enviaAnycastNone( grupo,prot);
 
 //                float valor=0;
 //
@@ -87,47 +144,51 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 //
 //                System.out.println("Maior valor de "+valor);
 
-                while(true){ Util.sleep(100); }
+                
 
             }
             catch(Exception e) {
                 System.err.println( "ERRO: " + e.toString() );
             }
-
-
-
-        } // if primeiro
+        }
+        // quem particpa do leilão : 
         else {
-            while (canalDeComunicacao.getView().getMembers().contains(primeiroMembro) && CONTINUE) {
+            while (CONTINUE) {
 
-                Util.sleep(100); // aguarda o primeiro membro sair do cluster
-
+                Util.sleep(100);
             }
-                System.out.println("Depois de entrar no leilao!");
+            
+            System.out.println("-----Leilão-----");
+            // aguarda o primeiro membro sair do cluster
+            Scanner teclado = new Scanner(System.in);
+            while(canalDeComunicacao.getView().getMembers().contains(primeiroMembro)) {
 
-                Scanner teclado = new Scanner(System.in);
+            	System.out.print("Lance :");
                 String line = "";
                 line=teclado.nextLine().toLowerCase();
 
                 try {
-                    enviaUnicast(primeiroMembro, line);
-
+                	Protocolo prot=new Protocolo();
+                    prot.setConteudo(line);
+                    prot.setResposta(false);  
+                    prot.setTipo(1);  
+                	
+                    enviaUnicastNone(primeiroMembro, prot);
 
                 }catch(Exception e) {
                         System.err.println( "ERRO: " + e.toString() );
                     }
 
-
+            }          
         }
             System.out.println("\nBye bye...");
-
     }
 
-    private RspList enviaMulticast(String conteudo) throws Exception{
-        System.out.println("\nENVIEI a pergunta: " + conteudo);
+    private RspList enviaMulticast(Protocolo conteudo) throws Exception{
+        System.out.println("\nENVIEI a pergunta: " + conteudo.getConteudo());
 
         Address cluster = null; //endereço null significa TODOS os membros do cluster
-        Message mensagem=new Message(cluster, "{MULTICAST} "+conteudo);
+        Message mensagem=new Message(cluster, conteudo);
 
         RequestOptions opcoes = new RequestOptions();
           opcoes.setMode(ResponseMode.GET_ALL); // espera receber a resposta de TODOS membros (ALL, MAJORITY, FIRST, NONE)
@@ -154,16 +215,14 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         return respList;
     }
 
-        private void enviaAnycastNone(Collection<Address> grupo, String conteudo) throws Exception{
-        System.out.println("\nENVIEI a pergunta: " + conteudo);
+        private void enviaAnycastNone(Collection<Address> grupo, Protocolo conteudo) throws Exception{
+        System.out.println("\nENVIEI o lance: " + conteudo.getConteudo());
 
-        Message mensagem=new Message(null, "{ ANYCAST } " + conteudo); //apesar do endereço ser null, se as opcoes contiverem anycasting==true enviará somente aos destinos listados
+        Message mensagem=new Message(null,conteudo); //apesar do endereço ser null, se as opcoes contiverem anycasting==true enviará somente aos destinos listados
 
         RequestOptions opcoes = new RequestOptions();
         opcoes.setMode(ResponseMode.GET_NONE); // espera receber a resposta da maioria do grupo (ALL, MAJORITY, FIRST, NONE)
         opcoes.setAnycasting(true);
-
-        System.out.println("Não precisa de resposta");
 
         despachante.castMessage(grupo, mensagem, opcoes); //ANYCAST
     }
@@ -181,26 +240,57 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 
         return resp;
     }
+    
+    private void enviaUnicastNone(Address destino, Protocolo conteudo) throws Exception{
+        System.out.println("\nEnviei: " + conteudo.getConteudo());
 
-    public void receive(Message msg) { //exibe mensagens recebidas
+        Message mensagem=new Message(destino,conteudo);
 
-//        System.out.println(msg.getSrc() + ": " + msg.getObject());
+        RequestOptions opcoes = new RequestOptions();
+          opcoes.setMode(ResponseMode.GET_NONE); // não espera receber a resposta do destino (ALL, MAJORITY, FIRST, NONE)
+
+          despachante.sendMessage(mensagem, opcoes);
+    }
+    
+  //exibe mensagens recebidas
+    public void receive(Message msg) { 
 
         System.out.println("" + msg.getSrc() + ": " + msg.getObject());
     }
 
     public Object handle(Message msg) throws Exception{ // responde requisições recebidas
-      String pergunta = (String) msg.getObject();
-      System.out.println("RECEBI uma mensagem: " + pergunta+"\n");
+      Protocolo pergunta = (Protocolo)msg.getObject();
+      
+    	//Diferenciar lance de outras mensagens
+    	if(pergunta.getTipo()==1)
+    	{
+    	      System.out.println("Lance : " + pergunta.getConteudo()+"\n");    						
+    	}
+    	else
+    	{
+    		System.out.println("Recebi uma msg : " + pergunta.getConteudo()+"\n");
+    	}
 
-        Scanner teclado = new Scanner(System.in);
-        String line = "";
-
-        line=teclado.nextLine().toLowerCase();
-
-        CONTINUE=false;
-
-        return line;
+	    Scanner teclado = new Scanner(System.in);
+	    String line = "";      
+  		Protocolo prot=new Protocolo();
+      
+  		//Quando precisa de resposta, para enviar
+      	if(pergunta.getResposta())
+      	{
+      		line=teclado.nextLine();
+            prot.setConteudo(line);
+            prot.setResposta(false);   
+            CONTINUE=false;
+      	}
+      	
+      	//atualizar a variavel novo_lance.
+      	if(pergunta.getTipo()==1)
+      	{
+      		NOVO_LANCE=Float.valueOf(pergunta.getConteudo()).floatValue();      						
+      	}
+      	
+        return prot;
     }
 
     public void viewAccepted(View new_view) { //exibe alterações na composição do grupo
