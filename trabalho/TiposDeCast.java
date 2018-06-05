@@ -13,10 +13,11 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 
     JChannel canalDeComunicacao;
     MessageDispatcher  despachante;
-    final int TAMANHO_MINIMO_CLUSTER = 3;
+    final int TAMANHO_MINIMO_CLUSTER = 2;
     boolean CONTINUE=true;
     float NOVO_LANCE=0;
     String nickname="";
+    Address leiloeiro=null; 
     
     public static void main(String[] args) throws Exception {
         new TiposDeCast().start();
@@ -35,14 +36,43 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         canalDeComunicacao.close();
     }
 
-    private void eventLoop() {
+    private void eventLoop()
+    {
     	//carregar o nome do usuario.
-    	loadNickname();  	
+    	//loadNickname();  
     	
-        //tamanho do grupo, para começar o leilao.
-        while( canalDeComunicacao.getView().size() < TAMANHO_MINIMO_CLUSTER )
-          Util.sleep(100); // aguarda os membros se juntarem ao cluster
-        criaSalaDeLeilao();
+	     Integer op=1;	     
+	     while(op!=3)
+	     {  
+	    	//menu 
+	    	op=menu();
+	    	
+	        switch (op) {
+            case 1:
+    	        //tamanho do grupo, para começar o leilao.
+    	        while( canalDeComunicacao.getView().size() < TAMANHO_MINIMO_CLUSTER )
+    	          Util.sleep(100);
+            	  novoLeilao();
+                break;
+            case 2:
+            		leilao();
+                break;
+	        }
+	     }
+    }
+    
+    //menu criado.
+    private Integer menu()
+    {
+	    Scanner teclado = new Scanner(System.in);
+	    
+        System.out.println("Escolha uma Opção:");
+        System.out.println("1 - Criar um novo leilao");
+        System.out.println("2 - Entrar para o leilao");
+        System.out.println("3 - Sair");
+        System.out.print("-> ");
+        
+	    return Integer.parseInt(teclado.nextLine());	
     }
     
     private void loadNickname(){ 
@@ -75,18 +105,19 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         }
       }
     
-    private void criaSalaDeLeilao(){
+    private void novoLeilao()
+    {
         Address meuEndereco = canalDeComunicacao.getAddress();
 
         Vector<Address> cluster = new Vector<Address>(canalDeComunicacao.getView().getMembers());
-        Address primeiroMembro = cluster.elementAt(0);//0 a N
-
-        if( meuEndereco.equals(primeiroMembro) ) {  // somente o primeiro membro envia o teste abaixo
+        //Address primeiroMembro = cluster.elementAt(0);//0 a N
 
             try {
                 Protocolo prot = new Protocolo();
                 prot.setConteudo("Quem quer participar do leilao de uma caneta?");
                 prot.setResposta(true);
+                prot.setEndereco(canalDeComunicacao.getAddress());
+                prot.setTipo(2);
                 
                 RspList teste=enviaMulticast(prot); //envia multicast para todos
                 
@@ -128,6 +159,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 	                        prot.setConteudo("Valor atual"+lance);
 	                        prot.setResposta(false);
 	                        prot.setTipo(0);
+	                        prot.setEndereco(canalDeComunicacao.getAddress());
 	                        enviaAnycastNone(grupo,prot);
 		                	cont=0;
 	                	}
@@ -147,6 +179,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 	                    prot.setConteudo("o leilao vai acabar em "+cont);
 	                    prot.setResposta(false);
 	                    prot.setTipo(0);
+                        prot.setEndereco(canalDeComunicacao.getAddress());
 	                    enviaAnycastNone(grupo,prot);
 	                }  
                 }                
@@ -156,10 +189,11 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
             }
             catch(Exception e) {
                 System.err.println( "ERRO: " + e.toString() );
-            }
-        }
-        // quem particpa do leilão : 
-        else {
+            }	
+    }
+     
+    private void leilao(){
+        
         	//segurar até aparecer algum leilão.
             while (CONTINUE) {
 
@@ -169,8 +203,8 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
             System.out.println("-----Leilão-----");
             // aguarda o primeiro membro sair do cluster
             Scanner teclado = new Scanner(System.in);
-            while(canalDeComunicacao.getView().getMembers().contains(primeiroMembro)) {
-
+            while(canalDeComunicacao.getView().getMembers().contains(leiloeiro))
+            {
             	System.out.print("Lance :");
                 String line = "";
                 line=teclado.nextLine().toLowerCase();
@@ -181,13 +215,13 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
                     prot.setResposta(false);  
                     prot.setTipo(1);  
                 	
-                    enviaUnicastNone(primeiroMembro, prot);
+                    enviaUnicastNone(leiloeiro, prot);
 
                 }catch(Exception e) {
                         System.err.println( "ERRO: " + e.toString() );
                     }
             }          
-        }
+        
             System.out.println("\nBye bye...");
     }
 
@@ -291,6 +325,14 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
       	{
       		NOVO_LANCE=Float.valueOf(pergunta.getConteudo()).floatValue();      						
       	}
+      	//pedido de leilao
+      	if (pergunta.getTipo()==2)
+      	{
+      		leiloeiro=pergunta.getEndereco();
+      		//System.out.println(pergunta.getEndereco()); 
+      		
+      	}
+      		
       	
         return prot;
     }

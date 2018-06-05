@@ -1,4 +1,5 @@
 import java.io.Serializable;
+import com.sun.jndi.cosnaming.IiopUrl.Address;
 
 
 public class Protocolo implements Serializable {
@@ -6,8 +7,10 @@ public class Protocolo implements Serializable {
     private boolean resposta;
     private String conteudo;
     private int tipo;
+    private org.jgroups.Address Endereco;
     
     //Tipo == 1 é um lance.
+    //2 == Novo leilao.
 
     public String getConteudo() {
         return this.conteudo;
@@ -32,6 +35,14 @@ public class Protocolo implements Serializable {
     public void setTipo(int tipo) {
         this.tipo=tipo;
     }
+
+	public org.jgroups.Address getEndereco() {
+		return Endereco;
+	}
+
+	public void setEndereco(org.jgroups.Address address) {
+		Endereco = address;
+	}
 
 
 
