@@ -1,9 +1,3 @@
-/*
- SAIBA MAIS: http://www.jgroups.org/manual/html/user-building-blocks.html#MessageDispatcher
-/**/
-
-
-//import Protocolo;
 import org.jgroups.*;
 import org.jgroups.blocks.*;
 import org.jgroups.util.*;
@@ -15,7 +9,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.*;
 
-
 public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 
     JChannel canalDeComunicacao;
@@ -25,7 +18,6 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     float NOVO_LANCE=0;
     String nickname="";
     
-
     public static void main(String[] args) throws Exception {
         new TiposDeCast().start();
     }
@@ -44,15 +36,13 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     }
 
     private void eventLoop() {
-    	
-    	loadNickname();
-    	
+    	//carregar o nome do usuario.
+    	loadNickname();  	
     	
         //tamanho do grupo, para começar o leilao.
         while( canalDeComunicacao.getView().size() < TAMANHO_MINIMO_CLUSTER )
           Util.sleep(100); // aguarda os membros se juntarem ao cluster
         criaSalaDeLeilao();
-
     }
     
     private void loadNickname(){ 
@@ -82,10 +72,8 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
           }catch(Exception e){
 
           }
-          
         }
       }
-    
     
     private void criaSalaDeLeilao(){
         Address meuEndereco = canalDeComunicacao.getAddress();
@@ -122,8 +110,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
                 
                 float lance=0;
                 
-                int cont=0;
-                
+                int cont=0;                
                 //leilão acontencendo.
                 boolean flag=true;             
                 while(flag){ 
@@ -148,8 +135,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 	                	
 	                	if(cont==3)
 	                	{
-	                		flag=false;
-	                		
+	                		flag=false;	                		
 	                	}
 	                	
 	                	cont++;
@@ -158,38 +144,11 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 	                    prot.setResposta(false);
 	                    prot.setTipo(0);;
 	                    enviaAnycastNone( grupo,prot);
-	                }
-	                
-	                
-                }
-                
+	                }  
+                }                
                 
                 System.out.println("Leilao ganho com valor: "+lance);
-                
-                //prot.setConteudo("O leilao vai comecar, qual o valor inicial?");
-                //prot.setResposta(false);
-
-               //enviaAnycastNone( grupo,prot);
-
-//                float valor=0;
-//
-//                for (int i = 0; i < grupo.size(); i++){
-//
-//                    String txt = (String)leilao.getValue(grupo.elementAt(i));
-//
-//                    float new_valor= Float.parseFloat(txt);
-//
-//                    if(valor < new_valor)
-//                    {
-//                        valor=new_valor;
-//                    }
-//
-//                }
-//
-//                System.out.println("Maior valor de "+valor);
-
-                
-
+                           
             }
             catch(Exception e) {
                 System.err.println( "ERRO: " + e.toString() );
@@ -197,6 +156,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         }
         // quem particpa do leilão : 
         else {
+        	//segurar até aparecer algum leilão.
             while (CONTINUE) {
 
                 Util.sleep(100);
@@ -222,7 +182,6 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
                 }catch(Exception e) {
                         System.err.println( "ERRO: " + e.toString() );
                     }
-
             }          
         }
             System.out.println("\nBye bye...");
@@ -239,8 +198,6 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
           opcoes.setAnycasting(false);
 
         RspList respList = despachante.castMessage(null, mensagem, opcoes); //MULTICAST
-//        System.out.println("==> Respostas do cluster ao MULTICAST:\n" +respList+"\n");
-
         return respList;
     }
 
@@ -297,10 +254,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     }
     
   //exibe mensagens recebidas
-    public void receive(Message msg) { 
-
-        System.out.println("" + msg.getSrc() + ": " + msg.getObject());
-    }
+    public void receive(Message msg) {System.out.println("" + msg.getSrc() + ": " + msg.getObject());}
 
     public Object handle(Message msg) throws Exception{ // responde requisições recebidas
       Protocolo pergunta = (Protocolo)msg.getObject();
@@ -342,6 +296,4 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         // se o coordenador morrer, deve eleger um novo.
         System.out.println("\t** nova View do cluster: " + new_view);
     }
-
-
 }//class
