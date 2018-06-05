@@ -20,6 +20,7 @@ sleep 1
 
 ## executar outras 3 janelas neste computador
 xterm -hold -e "$RUN_CMD"  &
+xterm -hold -e "$RUN_CMD"  &
 
 ## OBS.: se nao tiver o xterm instalado, use o comando abaixo:
 #x-terminal-emulator -e "$RUN_CMD"  &

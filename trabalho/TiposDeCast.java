@@ -13,7 +13,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 
     JChannel canalDeComunicacao;
     MessageDispatcher  despachante;
-    final int TAMANHO_MINIMO_CLUSTER = 2;
+    final int TAMANHO_MINIMO_CLUSTER = 3;
     boolean CONTINUE=true;
     float NOVO_LANCE=0;
     String nickname="";
@@ -61,7 +61,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
             auxout.append(nickname);
             auxout.close();
           }catch(Exception e){
-
+        	 //nao mostra o erro. 	
           } 
         }else{
               try{
@@ -70,7 +70,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
                   this.nickname = lerArq.readLine();
                   arq.close();
           }catch(Exception e){
-
+        	//nao mostra o erro. 	
           }
         }
       }
@@ -101,13 +101,14 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
                 //cria grupo para os que responderam y
                 Vector<Address> grupo = new Vector<Address>();
                 for (int i = 0; i < cluster.size(); i++){
-
-                    if(teste.getValue(cluster.elementAt(i)).equals("y"))
+                	
+                	prot = (Protocolo)teste.getValue(cluster.elementAt(i));
+                    if(prot.getConteudo().equals("y"))
                     {
                         grupo.add(cluster.elementAt(i));
                     }
                 }
-                
+        
                 float lance=0;
                 
                 int cont=0;                
@@ -123,12 +124,15 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 	                	if(NOVO_LANCE>lance)
 	                	{
 	                		lance=NOVO_LANCE;
-	                		System.out.println("Objeto esta com o valor: "+lance);
+	                		
+	                        prot.setConteudo("Valor atual"+lance);
+	                        prot.setResposta(false);
+	                        prot.setTipo(0);
+	                        enviaAnycastNone(grupo,prot);
 		                	cont=0;
 	                	}
 	                	
 	                	NOVO_LANCE=0;
-
 	                }
 	                //depois de um tempo, não aconteceu nenhum lance.
 	                else {
@@ -142,8 +146,8 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 	                	
 	                    prot.setConteudo("o leilao vai acabar em "+cont);
 	                    prot.setResposta(false);
-	                    prot.setTipo(0);;
-	                    enviaAnycastNone( grupo,prot);
+	                    prot.setTipo(0);
+	                    enviaAnycastNone(grupo,prot);
 	                }  
                 }                
                 
