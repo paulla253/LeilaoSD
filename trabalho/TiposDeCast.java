@@ -55,8 +55,6 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     	        //tamanho do grupo, para começar o leilao.
     	        while( canalDeComunicacao.getView().size() < TAMANHO_MINIMO_CLUSTER )
     	          Util.sleep(100);
-
-    	        
             	  novoLeilao();
                 break;
             case 2:
@@ -186,10 +184,12 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
                         prot.setEndereco(canalDeComunicacao.getAddress());
 	                    enviaAnycastNone(grupo,prot);
 	                }  
-                }                
+                }
                 
-                System.out.println("Leilao ganho com valor: "+lance);
-                           
+                prot.setConteudo("Leilao ganho com valor: "+lance);
+                prot.setResposta(true);
+                prot.setEndereco(canalDeComunicacao.getAddress());
+                prot.setTipo(0);                           
             }
             catch(Exception e) {
                 System.err.println( "ERRO: " + e.toString() );
@@ -241,6 +241,19 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 
         RspList respList = despachante.castMessage(null, mensagem, opcoes); //MULTICAST
         return respList;
+    }
+    
+    private void enviaMulticastnNone(Protocolo conteudo) throws Exception{
+        System.out.println("\nENVIEI a pergunta: " + conteudo.getConteudo());
+
+        Address cluster = null; //endereço null significa TODOS os membros do cluster
+        Message mensagem=new Message(cluster, conteudo);
+
+        RequestOptions opcoes = new RequestOptions();
+          opcoes.setMode(ResponseMode.GET_NONE); // espera receber a resposta de TODOS membros (ALL, MAJORITY, FIRST, NONE)
+          opcoes.setAnycasting(false);
+
+        despachante.castMessage(null, mensagem, opcoes); //MULTICAST
     }
 
     private RspList enviaAnycast(Collection<Address> grupo, String conteudo) throws Exception{
