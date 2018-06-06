@@ -9,8 +9,10 @@ public class Protocolo implements Serializable {
     private int tipo;
     private org.jgroups.Address Endereco;
     
-    //Tipo == 1 é um lance.
-    //2 == Novo leilao.
+    //Tipo:
+    //1== é um lance.
+    //2== Novo leilao.
+    //3== Entrar em um grupo
 
     public String getConteudo() {
         return this.conteudo;
@@ -43,7 +45,4 @@ public class Protocolo implements Serializable {
 	public void setEndereco(org.jgroups.Address address) {
 		Endereco = address;
 	}
-
-
-
 }
