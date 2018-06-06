@@ -28,6 +28,9 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         //Cria o canal de comunicação com uma configuração padrão do JGroups
 	    canalDeComunicacao=new JChannel();
         canalDeComunicacao.setReceiver(this);
+        
+        //carregando o nome do usuario.
+        canalDeComunicacao.setName(loadNickname());
 
         despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);
 
@@ -52,6 +55,8 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     	        //tamanho do grupo, para começar o leilao.
     	        while( canalDeComunicacao.getView().size() < TAMANHO_MINIMO_CLUSTER )
     	          Util.sleep(100);
+
+    	        
             	  novoLeilao();
                 break;
             case 2:
@@ -75,17 +80,14 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 	    return Integer.parseInt(teclado.nextLine());	
     }
     
-    private void loadNickname(){ 
+    private String loadNickname(){ 
 
         File nicknameFile = new File("nickname.txt");
         
         if(!nicknameFile.exists()){
           System.out.print("Escolha seu nickname: ");
   	    	Scanner teclado = new Scanner(System.in);
-	      	System.out.print("Lance :");
-          
-	        nickname = teclado.nextLine();
-	        System.out.println();
+	        String nickname = teclado.nextLine();
           try{
             BufferedWriter auxout = new BufferedWriter(new FileWriter(nicknameFile));
             auxout.append(nickname);
@@ -103,6 +105,8 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         	//nao mostra o erro. 	
           }
         }
+        
+        return nickname;
       }
     
     private void novoLeilao()
