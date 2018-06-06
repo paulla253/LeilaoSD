@@ -353,7 +353,6 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     
     private void enviaUnicastNone(Address destino, Protocolo conteudo) throws Exception{
         System.out.println("\nEnviei: " + conteudo.getConteudo());
-        System.out.println("\nEnviei: " + destino);
 
         Message mensagem=new Message(destino,conteudo);
 
