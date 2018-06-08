@@ -31,7 +31,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         canalDeComunicacao.setReceiver(this);
         
         //carregando o nome do usuario.
-        //canalDeComunicacao.setName(loadNickname());
+        canalDeComunicacao.setName(loadNickname());
 
         despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);
 
@@ -131,9 +131,30 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     }
     
     private String loadNickname(){ 
-    	
     	String nickname=null;
+    	
+    	/* Quando Persistencia ficar pronto: 
+		System.out.print("Login: ");
+  	    Scanner teclado = new Scanner(System.in);
+	    nickname = teclado.nextLine();
+		
+		int login = loginNickname(nickname);
+		if (login == 1) { // Usuario ja possui um login
+			System.out.print("Deseja retornar para sua seção anterior?(y/n): ");
+	       	String opcao = teclado.nextLine();
+	       	//IMPLEMENTAR RESTAURAÇÃO DE SEÇÃO
+		}
+		else if (login == 0) { // Usuario logou pela primeira vez
+			System.out.print("O Login foi um sucesso!");
+		}
+		else {
+			System.out.print("OPS! Ocorreu um erro, tente novamente.");
+			System.exit(0);
+		}
+		return(nickname);
+    	*/
 
+		// LOGIN PROVISORIO
         File nicknameFile = new File("nickname.txt");
         
         if(!nicknameFile.exists()){
