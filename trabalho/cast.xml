@@ -16,7 +16,6 @@
     <pbcast.NAKACK2/>
     <tom.TOA/>
     <UNICAST3/>
-    <pbcast.STABLE/>
     <pbcast.GMS/>
     <SEQUENCER />
     
