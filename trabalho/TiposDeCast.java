@@ -90,14 +90,13 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     {
 	    Scanner teclado = new Scanner(System.in);
 	    
-        System.out.println("Escolha uma Opção:");
-        System.out.println("1 - Criar um novo leilao");
-        System.out.println("2 - Entrar para o leilao");
-        System.out.println("3 - Mostrar historico do leilao");
-        System.out.println("4 - Deslogar usuario");        
-        System.out.println("5 - Sair");
-        System.out.print("-> ");
-        
+        System.out.println("Escolha uma Opção: \n "
+        		+ "1 - Criar um novo leilao \n "
+        		+ "2 - Entrar para o leilao \n "
+        		+ "3 - Mostrar historico do leilao"
+        		+ "4 - Deslogar usuario\n"
+        		+ "5 - Sair \n"
+        		+ "-> ");    
 	    return Integer.parseInt(teclado.nextLine());	
     }
     
