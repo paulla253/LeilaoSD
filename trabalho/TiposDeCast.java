@@ -37,6 +37,8 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         //canalDeComunicacao.setName(loadNickname());
 	    
         canalDeComunicacao.setReceiver(this);
+        despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);  
+        
         canalDeComunicacao.connect("TiposDeCast");
 
            eventLoop();
@@ -92,19 +94,6 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         if(leiloeiro==null)
         {
         	System.out.println("Não foi encontrado esse usuário");        	
-        }
-        else
-        {
-            try {
-            	Protocolo prot=new Protocolo();
-                prot.setConteudo("Entrei para o leilao, meu nickname é "+canalDeComunicacao.getAddress());
-                prot.setResposta(false);  
-                prot.setTipo(3);               
-                enviaUnicastNone(leiloeiro, prot);
-
-            }catch(Exception e) {
-                    System.err.println( "ERRO: " + e.toString() );
-            }
         }
     }
     
@@ -243,17 +232,34 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     //participar do leilao. 
     private void leilao(){
     	
-		
-		
-				Protocolo prot=new Protocolo();
-		        prot.setResposta(true);
-		        prot.setTipo(0); 
-				
-				
-				enviaUnicast
-		
-    	
-                   
+    			boolean flag=true;
+    			while(flag)
+    			{	   	
+					Protocolo prot=new Protocolo();
+			        prot.setResposta(true);
+			        prot.setConteudo("Entrar para o leilao");
+			        prot.setTipo(3); 
+					
+					try {
+						String resp = enviaUnicast(leiloeiro,prot);
+						
+						System.out.println(resp);
+						
+						if(resp.contains("y"))
+						{
+							//Conseguiu entrar no leilao.
+							break;						
+						}
+						
+						enviarMsgPeloNick();
+						System.out.println("Não foi possivel entrar na sala.");					
+						
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+    			}
+		               
             System.out.println("-----Leilão-----");
             // aguarda o primeiro membro sair do cluster
             Scanner teclado = new Scanner(System.in);
@@ -333,24 +339,22 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         opcoes.setMode(ResponseMode.GET_NONE); // espera receber a resposta da maioria do grupo (ALL, MAJORITY, FIRST, NONE)
         opcoes.setAnycasting(true);
 
-        despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);
+       // despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);
         despachante.castMessage(grupo, mensagem, opcoes); //ANYCAST
     }
 
-    private String enviaUnicast(Address destino, String conteudo) throws Exception{
-        System.out.println("\nENVIEI a pergunta: " + conteudo);
+        private String enviaUnicast(Address destino, Protocolo conteudo) throws Exception{
+            System.out.println("\nENVIEI a pergunta: " + conteudo.getConteudo());
 
-        Message mensagem=new Message(destino, "Lance:" + conteudo);
+            Message mensagem=new Message(destino,conteudo);
 
-        RequestOptions opcoes = new RequestOptions();
-          opcoes.setMode(ResponseMode.GET_FIRST); // não espera receber a resposta do destino (ALL, MAJORITY, FIRST, NONE)
+            RequestOptions opcoes = new RequestOptions(); 
+              opcoes.setMode(ResponseMode.GET_FIRST); // não espera receber a resposta do destino (ALL, MAJORITY, FIRST, NONE)
 
-        despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);  
-        String resp = despachante.sendMessage(mensagem, opcoes); //UNICAST
-        System.out.println("==> Respostas do membro ao UNICAST:\n" +resp+"\n");
+            String resp = despachante.sendMessage(mensagem, opcoes); //UNICAST
 
-        return resp;
-    }
+            return resp;
+        } 
     
     private void enviaUnicastNone(Address destino, Protocolo conteudo) throws Exception{
         System.out.println("\nEnviei: " + conteudo.getConteudo());
@@ -360,7 +364,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         RequestOptions opcoes = new RequestOptions();
           opcoes.setMode(ResponseMode.GET_NONE); // não espera receber a resposta do destino (ALL, MAJORITY, FIRST, NONE)
 
-          despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);
+         // despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);
           despachante.sendMessage(mensagem, opcoes);
     }
     
@@ -383,6 +387,19 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 	    Scanner teclado = new Scanner(System.in);
 	    String line = "";      
   		Protocolo prot=new Protocolo();
+  		
+      	//pedir para entrar no leilao
+      	if(pergunta.getTipo()==3)
+      	{
+      		System.out.println("Teste");
+      		
+      		if(leilao) {
+          		grupo.add(msg.getSrc());     			
+      			return "y";
+      		}
+      		else
+      			return "n";
+      	}
       
   		//Quando precisa de resposta, para enviar
       	if(pergunta.getResposta())
@@ -406,12 +423,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
       	{
       		leiloeiro=msg.getSrc();     		
       	}
-      	//pedir para entrar no leilao
-      	if(pergunta.getTipo()==3 && leilao)
-      	{
-      		grupo.add(msg.getSrc());
-      	}
-      		
+  		
         return prot;
     }
 
