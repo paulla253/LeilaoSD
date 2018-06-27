@@ -12,11 +12,15 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 
     JChannel canalDeComunicacao;
     MessageDispatcher  despachante;
+	Scanner teclado = new Scanner(System.in);
     
     //tamanho minimo do grupo.
     final int TAMANHO_MINIMO_GRUPO = 1;
+    //guardar lance e ganhador
     float NOVO_LANCE=0;
     Address NOVO_GANHADOR=null;
+    
+    //codigo do leiloeiro
     Address leiloeiro=null;
     
     //olhar se o leilao está acontecendo.
@@ -34,16 +38,38 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 
     private void start() throws Exception
     {
-        //Cria o canal de comunicação com uma configuração padrão do JGroups
-	    canalDeComunicacao=new JChannel();
+	    JChannel canalDeComunicacaoControle=new JChannel();
        
         //carregando o nome do usuario.
         //canalDeComunicacao.setName(loadNickname());
 	    
+	    
+	    canalDeComunicacaoControle.connect("XxXControle");
+	    canalDeComunicacaoControle.setReceiver(this);
+	    despachante=new MessageDispatcher(canalDeComunicacaoControle, null, null, this);  
+	  //   
+	     System.out.println("Abre");
+	
+	     Protocolo prot=new Protocolo();   
+         prot.setConteudo("Estou online");
+         prot.setResposta(false);
+         prot.setTipo(17);
+         
+         try {
+             enviaMulticastnNone(prot);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    canalDeComunicacaoControle.close();	    
+	    
+	    
+        //Cria o canal de comunicação com uma configuração padrão do JGroups	    
+	    canalDeComunicacao=new JChannel();    
         canalDeComunicacao.setReceiver(this);
         despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);  
         
-        canalDeComunicacao.connect("TiposDeCast");
+        canalDeComunicacao.connect("XxXLeilao");
 
            eventLoop();
         canalDeComunicacao.close();
@@ -66,7 +92,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 	        	 	//encontrar algum leilao
 	        	 	if(leiloeiro!=null)
 	        	 	{
-	        	 		leilao();
+	        	 		participarLeilao();
 	        	 	}
                 break;
 	        }	    
@@ -75,8 +101,6 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     
     private Integer menu_login()
     {
-	    Scanner teclado = new Scanner(System.in);
-	    
         System.out.println("Escolha uma Opção:");
         System.out.println("1 - Criar novo usuario");
         System.out.println("2 - Logar com um usuario existe");
@@ -87,9 +111,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     
     //menu criado.
     private Integer menu_leilao()
-    {
-	    Scanner teclado = new Scanner(System.in);
-	    
+    {    
         System.out.println("Escolha uma Opção: \n "
         		+ "1 - Criar um novo leilao \n "
         		+ "2 - Entrar para o leilao \n "
@@ -108,7 +130,6 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         //olhando a existencia do arquivo.
         if(!nicknameFile.exists()){
           System.out.print("Escolha seu nickname: ");
-  	    	Scanner teclado = new Scanner(System.in);
 	        nickname = teclado.nextLine();
           try{
             BufferedWriter auxout = new BufferedWriter(new FileWriter(nicknameFile));
@@ -131,9 +152,44 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         return nickname;
       }
     
+    //comunicacao com o Leiloeiro->Controle.
+    private void cadastrarItem()
+    {
+        try {
+        	
+   	     	System.out.println("Digite o codigo do item");
+   		    String line = "";  
+   	  		line=teclado.nextLine();
+       	 
+     	    JChannel canalDeComunicacaoControle=new JChannel();
+    	    canalDeComunicacaoControle.connect("XxXControle");
+    	    canalDeComunicacaoControle.setReceiver(this);
+    	    despachante=new MessageDispatcher(canalDeComunicacaoControle, null, null, this);  
+  
+    	     Protocolo prot1=new Protocolo();   
+             prot1.setConteudo(line);
+             prot1.setResposta(false);
+             prot1.setTipo(12);
+        	    	 
+             enviaMulticastnNone(prot1);
+             
+             canalDeComunicacaoControle.close();
+             despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);
+             
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    	
+    	
+    }
+    
     //criando nova sala de Leilao.
     private void novoLeilao()
-    {    	
+    {  
+    	cadastrarItem();
+    	
+    	
     	leilao=true;
     	
     	System.out.println("Esperando usuarios entrarem...");   
@@ -151,11 +207,10 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
                 while(flag){ 
                 	
                 	//Esperar chegar novos lances
-                	Util.sleep(5000); 
-               	
+                	Util.sleep(5000);          
 
-	                	if(NOVO_LANCE>lance)
-	                	{
+	                if(NOVO_LANCE>lance)
+	                {
 	                		lance=NOVO_LANCE;
 	                		ganhador=NOVO_GANHADOR;
 	                		
@@ -169,7 +224,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 								e.printStackTrace();
 							}
 		                	cont=0;
-	                	}
+	                }
 	                //depois de um tempo, não aconteceu nenhum lance.
 	                else {
 	                		                	
@@ -203,7 +258,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     }
     
     //participar do leilao. 
-    private void leilao(){
+    private void participarLeilao(){
     	
     			boolean flag=true;
     			while(flag)
@@ -235,7 +290,6 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 		               
             System.out.println("-----Leilão-----");
             // aguarda o primeiro membro sair do cluster
-            Scanner teclado = new Scanner(System.in);
             while(leilaoAcontecendo)
             {
             	//sair ao terminar o leilao,para não esperar um lance.
@@ -287,7 +341,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
           opcoes.setMode(ResponseMode.GET_NONE); // espera receber a resposta de TODOS membros (ALL, MAJORITY, FIRST, NONE)
           opcoes.setAnycasting(false);
           
-        despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);
+        //despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);
         despachante.castMessage(null, mensagem, opcoes); //MULTICAST
     }
 
@@ -360,9 +414,9 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     	{
     		System.out.println("Recebi uma msg : " + pergunta.getConteudo()+"\n");
     	}
-
-	    Scanner teclado = new Scanner(System.in);
-	    String line = "";      
+    	
+	    String line = "";  
+	    
   		Protocolo prot=new Protocolo();
   		
       	//pedir para entrar no leilao
@@ -422,7 +476,6 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
   	
 	    System.out.println("Digite o nome do usuario do leiloeiro da sala: ");
   	
-	    Scanner teclado = new Scanner(System.in);
 	    String line=teclado.nextLine(); 
 	    
 	    Vector<Address> cluster = new Vector<Address>(canalDeComunicacao.getView().getMembers());
@@ -443,6 +496,5 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
       	System.out.println("Não foi encontrado esse usuário");        	
       }
   }
-  
   
 }//class

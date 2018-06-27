@@ -22,6 +22,7 @@ public class Protocolo implements Serializable {
     //14=Restaura log (Quandor cair)
     //15=Listar itens ganhadores.
     //16=Registrar Ganhador.
+    //17=usuario online.
     
 
     public String getConteudo() {
