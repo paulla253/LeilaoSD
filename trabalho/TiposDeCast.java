@@ -94,6 +94,9 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 	        	 		participarLeilao();
 	        	 	}
                 break;
+            case 3:
+            		historicoLeilao();
+                break;
 	        }	    
 	     }
     }
@@ -115,10 +118,35 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         		+ "1 - Criar um novo leilao \n "
         		+ "2 - Entrar para o leilao \n "
         		+ "3 - Mostrar historico do leilao \n"
-        		+ "4 - Deslogar usuario\n"
+        		+ "4 - Deslogar usuario \n"
         		+ "5 - Sair \n"
         		+ "-> ");    
 	    return Integer.parseInt(teclado.nextLine());	
+    }
+    
+    private void historicoLeilao()
+    {
+        try {
+       	 
+     	    JChannel canalDeComunicacaoControle=new JChannel();
+    	    canalDeComunicacaoControle.connect("XxXControle");
+    	    canalDeComunicacaoControle.setReceiver(this);
+    	    despachante=new MessageDispatcher(canalDeComunicacaoControle, null, null, this);  
+  
+    	     Protocolo prot1=new Protocolo();   
+             //prot1.setConteudo(); nao precisa colocar o texto.
+             prot1.setResposta(false);
+             prot1.setTipo(18);
+        	    	 
+             enviaMulticastnNone(prot1);
+             
+             canalDeComunicacaoControle.close();
+             despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);
+             
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
     }
     
     private String loadNickname(){ 
@@ -210,8 +238,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     //criando nova sala de Leilao.
     private void novoLeilao()
     {  
-    	cadastrarItem();
-    	
+    	cadastrarItem();   	
     	
     	leilao=true;
     	

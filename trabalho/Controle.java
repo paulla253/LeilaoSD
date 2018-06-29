@@ -160,6 +160,13 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
     		usuariosOnline.add(msg.src());
     	    System.out.println("Novo usuario"+msg.src());    						
     	}
+    	
+    	// 18 - Pedir historico do leilao=================MODELO===================.
+    	if(pergunta.getTipo()==18)
+    	{
+    	    System.out.println("Pedir historico do leilao.");    						
+    	}
+    	
     	//12=Criar sala(item com o leilao)
     	if(pergunta.getTipo()==12)
     	{
@@ -169,7 +176,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
     	}
     	
     	//15=Cadastrar ganhador, deve ser repassado para o modelo)
-    	if(pergunta.getTipo()==12)
+    	if(pergunta.getTipo()==15)
     	{
     	    System.out.println("Ganhador"+pergunta.getConteudo()+"Lance"+pergunta.getConteudoExtra());    						
     	}

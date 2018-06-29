@@ -23,6 +23,7 @@ public class Protocolo implements Serializable {
     //15=Listar itens ganhadores.
     //16=Registrar Ganhador.
     //17=usuario online.
+    //18=Pedir historico dos leiloes.
     
 
     public String getConteudo() {
