@@ -43,7 +43,6 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         //carregando o nome do usuario.
         //canalDeComunicacao.setName(loadNickname());
 	    
-	    
 	    canalDeComunicacaoControle.connect("XxXControle");
 	    canalDeComunicacaoControle.setReceiver(this);
 	    despachante=new MessageDispatcher(canalDeComunicacaoControle, null, null, this);  
@@ -115,7 +114,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         System.out.println("Escolha uma Opção: \n "
         		+ "1 - Criar um novo leilao \n "
         		+ "2 - Entrar para o leilao \n "
-        		+ "3 - Mostrar historico do leilao"
+        		+ "3 - Mostrar historico do leilao \n"
         		+ "4 - Deslogar usuario\n"
         		+ "5 - Sair \n"
         		+ "-> ");    
@@ -180,8 +179,32 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-    	
-    	
+    }
+    
+    private void cadastrarGanhadorLeilao(Address ganhador, float lance)
+    {
+        try {
+        	
+     	    JChannel canalDeComunicacaoControle=new JChannel();
+    	    canalDeComunicacaoControle.connect("XxXControle");
+    	    canalDeComunicacaoControle.setReceiver(this);
+    	    despachante=new MessageDispatcher(canalDeComunicacaoControle, null, null, this);  
+  
+    	     Protocolo prot1=new Protocolo();   
+             prot1.setConteudo(ganhador.toString());
+             prot1.setConteudoExtra(Float.toString(lance));;
+             prot1.setResposta(false);
+             prot1.setTipo(15);
+        	    	 
+             enviaMulticastnNone(prot1);
+             
+             canalDeComunicacaoControle.close();
+             despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);
+             
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
     }
     
     //criando nova sala de Leilao.
@@ -246,6 +269,8 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 	                }  
                 }
                 
+                cadastrarGanhadorLeilao(ganhador,lance);
+                
                 prot.setConteudo("Ganhador "+ganhador+"Leilao ganho com valor: "+lance);
                 prot.setResposta(false);
                 prot.setTipo(5); 
@@ -255,6 +280,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+                
     }
     
     //participar do leilao. 

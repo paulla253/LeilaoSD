@@ -4,6 +4,8 @@ import org.jgroups.util.*;
 
 import com.sun.deploy.uitoolkit.impl.fx.Utils;
 
+import tste.Ganhadores;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -19,7 +21,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
     //usuarios online
     Vector<Address> usuariosOnline = new Vector<Address>();
     Vector<String> salaLeilao = new Vector<String>();
-
+    Vector<Ganhadores> ganhando = new Vector<Ganhadores>();
     
     public static void main(String[] args) throws Exception {
         new Controle().start();
@@ -158,11 +160,22 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
     		usuariosOnline.add(msg.src());
     	    System.out.println("Novo usuario"+msg.src());    						
     	}
-    	
+    	//12=Criar sala(item com o leilao)
     	if(pergunta.getTipo()==12)
     	{
-    	    System.out.println("Novo leilao"+pergunta.getConteudo());    						
+    		Ganhadores ganhador= new Ganhadores(pergunta.getConteudo(),msg.src().toString());
+    		ganhando.add(ganhador);
+    	    System.out.println("Novo leilao"+pergunta.getConteudo()+"Leiloeiro"+msg.src());    						
     	}
+    	
+    	//15=Cadastrar ganhador, deve ser repassado para o modelo)
+    	if(pergunta.getTipo()==12)
+    	{
+    	    System.out.println("Ganhador"+pergunta.getConteudo()+"Lance"+pergunta.getConteudoExtra());    						
+    	}
+    	
+    	
+    	
     	
         return null;
     }
