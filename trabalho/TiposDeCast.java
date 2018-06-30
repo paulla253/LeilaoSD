@@ -69,7 +69,6 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 			}
 	    canalDeComunicacaoControle.close();	    
 	    
-	    
         //Cria o canal de comunicação com uma configuração padrão do JGroups	    
 	    canalDeComunicacao=new JChannel();
 	    canalDeComunicacao.setName(nickname);
@@ -256,34 +255,41 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
       }
     
     //comunicacao com o Leiloeiro->Controle.
-    private void cadastrarItem()
+    private boolean cadastrarItem()
     {
-        try {
-        	
-   	     	System.out.println("Digite o codigo do item");
-   		    String line = "";  
-   	  		line=teclado.nextLine();
-       	 
-     	    JChannel canalDeComunicacaoControle=new JChannel();
-     	    canalDeComunicacaoControle.setName(nickname);
-    	    canalDeComunicacaoControle.connect("XxXControle");
-    	    canalDeComunicacaoControle.setReceiver(this);
-    	    despachante=new MessageDispatcher(canalDeComunicacaoControle, null, null, this);  
-  
-    	     Protocolo prot1=new Protocolo();   
-             prot1.setConteudo(line);
-             prot1.setResposta(false);
-             prot1.setTipo(12);
-        	    	 
-             enviaMulticastNone(prot1);
-             
-             canalDeComunicacaoControle.close();
-             despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);
-             
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+	        try {
+	        	
+	   	     	System.out.println("Digite o codigo do item");
+	   		    String line = "";  
+	   	  		line=teclado.nextLine();
+	       	 
+	     	    JChannel canalDeComunicacaoControle=new JChannel();
+	     	    canalDeComunicacaoControle.setName(nickname);
+	    	    canalDeComunicacaoControle.connect("XxXControle");
+	    	    canalDeComunicacaoControle.setReceiver(this);
+	    	    despachante=new MessageDispatcher(canalDeComunicacaoControle, null, null, this);  
+	  
+	    	     Protocolo prot1=new Protocolo();   
+	             prot1.setConteudo(line);
+	             prot1.setResposta(true);
+	             prot1.setTipo(12);
+	        	    	 
+	             String resp= enviaMulticastFirst(prot1).getFirst().toString();
+
+	             canalDeComunicacaoControle.close();
+	             despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);	             
+	             
+				if(resp.contains("n"))
+				{
+					return true;					
+				}
+	             
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	        
+	        return false;
     }
     
     private void cadastrarGanhadorLeilao(Address ganhador, float lance)
@@ -291,7 +297,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         try {
         	
      	    JChannel canalDeComunicacaoControle=new JChannel();
-     	   canalDeComunicacaoControle.setName(nickname);
+     	    canalDeComunicacaoControle.setName(nickname);
     	    canalDeComunicacaoControle.connect("XxXControle");
     	    canalDeComunicacaoControle.setReceiver(this);
     	    despachante=new MessageDispatcher(canalDeComunicacaoControle, null, null, this);  
@@ -316,76 +322,77 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     //criando nova sala de Leilao.
     private void novoLeilao()
     {  
-    	cadastrarItem();   	
-    	
-    	leilao=true;
-    	
-    	System.out.println("Esperando usuarios entrarem...");   
-    	
-        while( grupo.size() < TAMANHO_MINIMO_GRUPO )
-	        Util.sleep(100);
-       
-            	Protocolo prot = new Protocolo();
-            	//valor inicial.
-                float lance=0;
-                Address ganhador=null;
-                int cont=0;                
-                //leilão acontencendo.
-                boolean flag=true;             
-                while(flag){ 
-                	
-                	//Esperar chegar novos lances
-                	Util.sleep(5000);          
-
-	                if(NOVO_LANCE>lance)
-	                {
-	                		lance=NOVO_LANCE;
-	                		ganhador=NOVO_GANHADOR;
-	                		
-	                        prot.setConteudo("Valor atual "+lance+"com o usuario"+ganhador);
-	                        prot.setResposta(false);
-	                        prot.setTipo(0);
-	                        try {
+    	if(cadastrarItem())
+    	{    	
+	    	leilao=true;	    	
+	    	System.out.println("Esperando usuarios entrarem...");   
+	    	
+	        while( grupo.size() < TAMANHO_MINIMO_GRUPO )
+		        Util.sleep(100);
+	       
+	            	Protocolo prot = new Protocolo();
+	            	//valor inicial.
+	                float lance=0;
+	                Address ganhador=null;
+	                int cont=0;                
+	                //leilão acontencendo.
+	                boolean flag=true;             
+	                while(flag){ 
+	                	
+	                	//Esperar chegar novos lances
+	                	Util.sleep(5000);          
+	
+		                if(NOVO_LANCE>lance)
+		                {
+		                		lance=NOVO_LANCE;
+		                		ganhador=NOVO_GANHADOR;
+		                		
+		                        prot.setConteudo("Valor atual "+lance+"com o usuario"+ganhador);
+		                        prot.setResposta(false);
+		                        prot.setTipo(0);
+		                        try {
+									enviaAnycastNone(grupo,prot);
+								} catch (Exception e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+			                	cont=0;
+		                }
+		                //depois de um tempo, não aconteceu nenhum lance.
+		                else {
+		                		                	
+		                	cont++;	                	
+		                    prot.setConteudo("o leilao vai acabar em "+cont);
+		                    prot.setResposta(false);
+		                    prot.setTipo(0);
+		                    try {
 								enviaAnycastNone(grupo,prot);
 							} catch (Exception e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
-		                	cont=0;
+		                    
+		                	if(cont==3)
+		                	{
+		                		flag=false;	                		
+		                	}
+		                }  
 	                }
-	                //depois de um tempo, não aconteceu nenhum lance.
-	                else {
-	                		                	
-	                	cont++;	                	
-	                    prot.setConteudo("o leilao vai acabar em "+cont);
-	                    prot.setResposta(false);
-	                    prot.setTipo(0);
-	                    try {
-							enviaAnycastNone(grupo,prot);
-						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-	                    
-	                	if(cont==3)
-	                	{
-	                		flag=false;	                		
-	                	}
-	                }  
-                }
-                
-                cadastrarGanhadorLeilao(ganhador,lance);
-                
-                prot.setConteudo("Ganhador "+ganhador+"Leilao ganho com valor: "+lance);
-                prot.setResposta(false);
-                prot.setTipo(5); 
-                try {
-					enviaMulticastNone(prot);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-                
+	                
+	                cadastrarGanhadorLeilao(ganhador,lance);
+	                
+	                prot.setConteudo("Ganhador "+ganhador+"Leilao ganho com valor: "+lance);
+	                prot.setResposta(false);
+	                prot.setTipo(5); 
+	                try {
+						enviaMulticastNone(prot);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+    	}
+    	else
+    		System.out.println("Esse item esta sendo leiloado");	                
     }
     
     //participar do leilao. 
@@ -552,7 +559,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
       
     	//11-Logar com um usuario já existente,deve responder null
     	//(Controle que tem conexão com o modelo,ficará responsavel por essa parte).
-    	if (pergunta.getTipo()==11)
+    	if (pergunta.getTipo()==11 && pergunta.getTipo()==12)
     	{
     		Util.sleep(1000);
     		return null;     		

@@ -2,14 +2,14 @@ package tste;
 
 import java.util.HashMap;
 
-public class Ganhadores {
+public class ControleSala {
 	
 	//não é exatamente ganhador, é os que está ganhando no momento.
     private String usuario;
     private String item;
     private String leiloeiro;
     
-    public Ganhadores(String item,String leiloeiro)
+    public ControleSala(String item,String leiloeiro)
     {
         this.leiloeiro = leiloeiro;
         this.item = item;
