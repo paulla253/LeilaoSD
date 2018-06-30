@@ -16,4 +16,3 @@ RUN_CMD="java $CONFIG -cp $LIBS Persistencia 2>/dev/null"
 echo "$RUN_CMD"
 
 xterm -hold -e "$RUN_CMD"  &
-xterm -hold -e "$RUN_CMD"  &

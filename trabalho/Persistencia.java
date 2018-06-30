@@ -59,6 +59,7 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler {
     			getNicknames();
     			System.out.println("Loading Salas..."); 
     	        getSalas();
+    	        criarNickname("luiz", "123");
     		} catch (IOException e) {
     			System.out.println("ERRO - Não foi possivel iniciar a Persistencia");
     			System.exit(1);
