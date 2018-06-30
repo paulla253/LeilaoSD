@@ -4,7 +4,7 @@ import org.jgroups.util.*;
 
 import com.sun.deploy.uitoolkit.impl.fx.Utils;
 
-import tste.Ganhadores;
+import tste.ControleSala;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -20,8 +20,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
 
     //usuarios online
     Vector<Address> usuariosOnline = new Vector<Address>();
-    Vector<String> salaLeilao = new Vector<String>();
-    Vector<Ganhadores> ganhando = new Vector<Ganhadores>();
+    Vector<ControleSala> controleSala = new Vector<ControleSala>();
     
     public static void main(String[] args) throws Exception {
         new Controle().start();
@@ -158,7 +157,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
     	if(pergunta.getTipo()==17)
     	{
     		usuariosOnline.add(msg.src());
-    	    System.out.println("Novo usuario"+msg.src());    						
+    	    System.out.println("Novo usuario "+msg.src());    						
     	}
     	
     	// 18 - Pedir historico do leilao=================MODELO===================.
@@ -167,22 +166,49 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
     	    System.out.println("Pedir historico do leilao.");    						
     	}
     	
+    	//11=Logar usuario =================MODELO===================.
+    	if(pergunta.getTipo()==11)
+    	{
+    	    System.out.println("Logar usuario "+pergunta.getConteudo()+"Senha "+pergunta.getConteudoExtra());    						
+    	    return "y";
+    	}
+    	
     	//12=Criar sala(item com o leilao)
     	if(pergunta.getTipo()==12)
     	{
-    		Ganhadores ganhador= new Ganhadores(pergunta.getConteudo(),msg.src().toString());
-    		ganhando.add(ganhador);
-    	    System.out.println("Novo leilao"+pergunta.getConteudo()+"Leiloeiro"+msg.src());    						
+    		ControleSala controle= new ControleSala(pergunta.getConteudo(),msg.src().toString());
+    		
+    		for (ControleSala item : controleSala)
+    		{
+        		if(item.getItem().equals(controle.getItem()))
+        		{
+        			return "y";
+        		}   			
+			}
+    		
+  		
+    		controleSala.add(controle);
+	    	System.out.println("Novo leilao "+pergunta.getConteudo()+"Leiloeiro "+msg.src());
+	    	
+			return "n";
     	}
     	
     	//15=Cadastrar ganhador, deve ser repassado para o modelo)
     	if(pergunta.getTipo()==15)
     	{
-    	    System.out.println("Ganhador"+pergunta.getConteudo()+"Lance"+pergunta.getConteudoExtra());    						
+    		int id;    		
+    		for (ControleSala item : controleSala)
+    		{
+        		if(item.getLeiloeiro().equals(msg.src().toString()))
+        		{
+        			controleSala.remove(item);
+        			System.out.println("Encontrou o item");
+        			break;
+        		}   			
+			}
+    		  		
+	    System.out.println("Ganhador "+pergunta.getConteudo()+" Lance "+pergunta.getConteudoExtra());    						
     	}
-    	
-    	
-    	
     	
         return null;
     }
