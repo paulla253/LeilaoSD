@@ -14,6 +14,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 
 import java.security.MessageDigest;
+import java.util.Map;
 
 /*POR FAZER:
     SINCRONIZAR PERSISTENCIAS
@@ -99,40 +100,53 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler {
     public Object handle(Message msg) throws Exception { 
         Protocolo pergunta = (Protocolo)msg.getObject();
     
-        //10=Criar novo usuario 
-        
-    	if(pergunta.getTipo()==10)
-    	{
-    	    System.out.println("Criar novo usuario"); 
-    	    
-    	    return "y"; 
+        // 10 = Criar novo usuario 
+    	if (pergunta.getTipo() == 10) {
+    	    if (criarNickname(pergunta.getConteudo(), pergunta.getConteudoExtra())) {
+    	    	System.out.println("Usuario Cadastrado: " + pergunta.getConteudo()); 
+    	    	return("y");
+    	    }
+    	    System.out.println("Usuario Indisponivel: " + pergunta.getConteudo());  
+    	    return("n");    	
     	}
     	
-        //11=Logar com o usuario
-    	if(pergunta.getTipo()==11)
-    	{
-    	    System.out.println("Logar com o usuario");    						
+        // 11 = Logar com o usuario
+    	if (pergunta.getTipo() == 11) {
+    		if (loginNickname(pergunta.getConteudo(), pergunta.getConteudoExtra())) {
+    	    	System.out.println("Acesso Permitido: " + pergunta.getConteudo()); 
+    	    	return("y");
+    	    }
+    	    System.out.println("Acesso Negado: " + pergunta.getConteudo());  
+    	    return("n");    	
     	}
     	
-        //12=Logar com o usuario
-    	if(pergunta.getTipo()==12)
-    	{
-    	    System.out.println("Logar com o usuario");    						
+        // 12 = Cria Sala
+    	if (pergunta.getTipo() == 12) {
+    		if (newSala(Integer.parseInt(pergunta.getConteudo()))) {
+    	    	System.out.println("Sala Cadastrada: " + pergunta.getConteudo()); 
+    	    	return("y");
+    	    }
+    	    System.out.println("Sala Indisponivel: " + pergunta.getConteudo());  
+    	    return("n");    	
     	}
     	
-    	//15=Listar itens ganhadores.
-    	if(pergunta.getTipo()==15)
-    	{
-    	    System.out.println("Listar itens ganhadores.");    						
+    	// 15 = Listar itens ganhadores.
+    	if (pergunta.getTipo() == 15) {
+    		System.out.println("Itens/Ganhadores Enviado");
+    		return(getItemGanhador());   						
     	}
     	
-    	//16=Registrar Ganhador.
-    	if(pergunta.getTipo()==16)
-    	{
-    	    System.out.println("Registrar Ganhador");    						
+    	// 16 = Registrar Ganhador.
+    	if (pergunta.getTipo() == 16) {
+    		if (setGanhador(Integer.parseInt(pergunta.getConteudo()), pergunta.getConteudoExtra())) {
+    			System.out.println("Ganhador Registrado: " + pergunta.getConteudoExtra()); 
+    			return("y");
+    		}
+    	    System.out.println("Ganhador não Registrado: " + pergunta.getConteudoExtra());  
+    	    return("n");
     	}
     	
-        return(pergunta); //*****************************
+        return(null);
     }
 
     public boolean loginNickname(String nickname, String senha) {        
@@ -243,7 +257,14 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler {
         return;
     }
     
-
+    private String getItemGanhador() {
+    	String string = new String();
+    	for (Map.Entry<Integer, String> entry : estado.salas.getSalas().entrySet()) {
+    	    string = string + "Item = " + entry.getKey() + " / Ganhador = " + entry.getValue() + "\n";
+    	}
+    	return(string);
+    }
+    
 }
 
 
