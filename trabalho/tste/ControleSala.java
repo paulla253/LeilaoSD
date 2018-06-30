@@ -1,7 +1,5 @@
 package tste;
 
-import java.util.HashMap;
-
 public class ControleSala {
 	
 	//não é exatamente ganhador, é os que está ganhando no momento.

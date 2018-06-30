@@ -2,15 +2,8 @@ import org.jgroups.*;
 import org.jgroups.blocks.*;
 import org.jgroups.util.*;
 
-import com.sun.deploy.uitoolkit.impl.fx.Utils;
-
 import tste.ControleSala;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.util.*;
 
 public class Controle extends ReceiverAdapter implements RequestHandler {
@@ -29,13 +22,11 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
     private void start() throws Exception
     {
         //Cria o canal de comunicação com uma configuração padrão do JGroups
-	    canalDeComunicacao=new JChannel();
-      
+	    canalDeComunicacao=new JChannel();    
 	    
         canalDeComunicacao.setReceiver(this);
         despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);  
-	    
-	    
+	    	    
 	     canalDeComunicacao.connect("XxXControle");
 	
 	        eventLoop();
@@ -60,7 +51,6 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
     	{   		
 	        Util.sleep(100);
     	}
-    
     }
     
     private RspList enviaMulticast(Protocolo conteudo) throws Exception{
@@ -186,7 +176,6 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
         		}   			
 			}
     		
-  		
     		controleSala.add(controle);
 	    	System.out.println("Novo leilao "+pergunta.getConteudo()+"Leiloeiro "+msg.src());
 	    	

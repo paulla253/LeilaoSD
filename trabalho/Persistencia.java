@@ -2,11 +2,8 @@ import org.jgroups.*;
 import org.jgroups.blocks.*;
 import org.jgroups.util.*;
 
-import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.FileInputStream;
@@ -15,9 +12,6 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.io.PrintWriter;
-
-import java.util.*;
 
 import java.security.MessageDigest;
 
@@ -37,7 +31,7 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler {
     }
 
     private void start() throws Exception {
-        canalDeComunicacao = new JChannel();
+        canalDeComunicacao = new JChannel("pilha_persistencia.xml");
         canalDeComunicacao.setReceiver(this);
         
         despachante = new MessageDispatcher(canalDeComunicacao, null, null, this);
@@ -52,6 +46,7 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler {
         System.out.println(canalDeComunicacao.getView().getMembers().toString());
     	if (canalDeComunicacao.getView().getMembers().size() > 1) {
         	canalDeComunicacao.getState(null, 10000);
+        	loginNickname("luiz","123");
     	} 
     	else {
     		try {
@@ -93,16 +88,47 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler {
             estado = state;
         }
     }
-
-    public Object handle(Message msg) throws Exception { // responde requisições recebidas
+    
+    //Comunicação persistenia: 
+    //10=Criar novo usuario
+    //11=Logar com o usuario
+    //12=Criar sala(item com o leilao)
+    //15=Listar itens ganhadores.
+    //16=Registrar Ganhador.
+    
+    public Object handle(Message msg) throws Exception { 
         Protocolo pergunta = (Protocolo)msg.getObject();
     
-        	/*if (pergunta.getTipo() == 1) {
-            	loginNickname(pergunta.getConteudo());                             
-        	}
-        	else if (pergunta.getTipo() == 2) {
-            	//gravar_log();
-        	}*/
+        //10=Criar novo usuario
+    	if(pergunta.getTipo()==10)
+    	{
+    	    System.out.println("Criar novo usuario");    						
+    	}
+    	
+        //11=Logar com o usuario
+    	if(pergunta.getTipo()==11)
+    	{
+    	    System.out.println("Logar com o usuario");    						
+    	}
+    	
+        //12=Logar com o usuario
+    	if(pergunta.getTipo()==12)
+    	{
+    	    System.out.println("Logar com o usuario");    						
+    	}
+    	
+    	//15=Listar itens ganhadores.
+    	if(pergunta.getTipo()==15)
+    	{
+    	    System.out.println("Listar itens ganhadores.");    						
+    	}
+    	
+    	//16=Registrar Ganhador.
+    	if(pergunta.getTipo()==16)
+    	{
+    	    System.out.println("Registrar Ganhador");    						
+    	}
+    	
         return(pergunta); //*****************************
     }
 
