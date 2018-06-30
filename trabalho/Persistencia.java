@@ -99,10 +99,13 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler {
     public Object handle(Message msg) throws Exception { 
         Protocolo pergunta = (Protocolo)msg.getObject();
     
-        //10=Criar novo usuario
+        //10=Criar novo usuario 
+        
     	if(pergunta.getTipo()==10)
     	{
-    	    System.out.println("Criar novo usuario");    						
+    	    System.out.println("Criar novo usuario"); 
+    	    
+    	    return "y"; 
     	}
     	
         //11=Logar com o usuario

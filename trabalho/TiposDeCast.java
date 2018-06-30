@@ -231,15 +231,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         
         //olhando a existencia do arquivo.
         if(!nicknameFile.exists()){
-          System.out.print("Escolha seu nickname: ");
-	        nickname = teclado.nextLine();
-          try{
-            BufferedWriter auxout = new BufferedWriter(new FileWriter(nicknameFile));
-            auxout.append(nickname);
-            auxout.close();
-          }catch(Exception e){
-        	 //nao mostra o erro. 	
-          } 
+        	menu_login();
         }else{
               try{
                   FileReader arq = new FileReader(nicknameFile);

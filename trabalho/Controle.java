@@ -143,7 +143,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
     public Object handle(Message msg) throws Exception{ 
       Protocolo pergunta = (Protocolo)msg.getObject();
       
-    	// 17 - Novo usuario online.
+    	// 17 - Novo usuario online.=================MODELO===================.
     	if(pergunta.getTipo()==17)
     	{
     		usuariosOnline.add(msg.src());
@@ -163,7 +163,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
     	    return "y";
     	}
     	
-    	//12=Criar sala(item com o leilao)
+    	//12=Criar sala(item com o leilao)=================MODELO===================.
     	if(pergunta.getTipo()==12)
     	{
     		ControleSala controle= new ControleSala(pergunta.getConteudo(),msg.src().toString());
@@ -182,7 +182,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
 			return "n";
     	}
     	
-    	//15=Cadastrar ganhador, deve ser repassado para o modelo)
+    	//15=Cadastrar ganhador, deve ser repassado para o modelo)=================MODELO===================
     	if(pergunta.getTipo()==15)
     	{
     		int id;    		
