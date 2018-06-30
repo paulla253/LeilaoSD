@@ -33,7 +33,6 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     Vector<Address> grupo = new Vector<Address>();
     
     String nickname="";
-    
     public static void main(String[] args) throws Exception {
         new TiposDeCast().start();
     }
@@ -43,7 +42,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 	    JChannel canalDeComunicacaoControle=new JChannel();
 	    
         //carregando o nome do usuario.
-        //canalDeComunicacao.setName(loadNickname());
+       // loadNickname(canalDeComunicacaoControle);
 	    
 	    canalDeComunicacaoControle.connect("XxXControle");
 	    canalDeComunicacaoControle.setReceiver(this);
@@ -224,14 +223,14 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 			}
     }
     
-    private String loadNickname(){ 
+    private String loadNickname(JChannel canalComunicacaoControle){ 
     	
     	String nickname=null;
         File nicknameFile = new File("nickname.txt");
         
         //olhando a existencia do arquivo.
         if(!nicknameFile.exists()){
-        	menu_login();
+        	controleMenuUsuario(canalComunicacaoControle);
         }else{
               try{
                   FileReader arq = new FileReader(nicknameFile);

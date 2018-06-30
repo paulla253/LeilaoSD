@@ -47,9 +47,21 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
 				e.printStackTrace();
 			}
     	
+         Address meuEndereco = canalDeComunicacao.getAddress();
+         
     	while(true)
-    	{   		
-	        Util.sleep(100);
+    	{  	    		
+            Vector<Address> cluster = new Vector<Address>(canalDeComunicacao.getView().getMembers());
+            Address primeiroMembro = cluster.elementAt(0);  //0 a N
+
+            if( meuEndereco.equals(canalDeComunicacao.getView().getMembers().get(0)) ) {
+            		
+            	System.out.println("Eu sou o primeiro.");
+
+            }
+    		
+    		
+	        Util.sleep(10000);
     	}
     }
     
@@ -64,6 +76,20 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
           opcoes.setAnycasting(false);
 
         despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);
+        RspList respList = despachante.castMessage(null, mensagem, opcoes); //MULTICAST
+        return respList;
+    }
+    
+    private RspList enviaMulticastFirst(Protocolo conteudo) throws Exception{
+        System.out.println("\nENVIEI a pergunta: " + conteudo.getConteudo());
+
+        Address cluster = null; //endereço null significa TODOS os membros do cluster
+        Message mensagem=new Message(cluster, conteudo);
+
+        RequestOptions opcoes = new RequestOptions();
+          opcoes.setMode(ResponseMode.GET_FIRST); // espera receber a resposta de TODOS membros (ALL, MAJORITY, FIRST, NONE)
+          opcoes.setAnycasting(false);
+
         RspList respList = despachante.castMessage(null, mensagem, opcoes); //MULTICAST
         return respList;
     }
@@ -143,45 +169,32 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
     public Object handle(Message msg) throws Exception{ 
       Protocolo pergunta = (Protocolo)msg.getObject();
       
-    	// 17 - Novo usuario online.=================MODELO===================.
-    	if(pergunta.getTipo()==17)
-    	{
-    		usuariosOnline.add(msg.src());
-    	    System.out.println("Novo usuario "+msg.src());    						
-    	}
-    	
-    	// 18 - Pedir historico do leilao=================MODELO===================.
-    	if(pergunta.getTipo()==18)
-    	{
-    	    System.out.println("Pedir historico do leilao.");    						
-    	}
-    	
-    	//11=Logar usuario =================MODELO===================.
-    	if(pergunta.getTipo()==11)
-    	{
-    	    System.out.println("Logar usuario "+pergunta.getConteudo()+"Senha "+pergunta.getConteudoExtra());    						
-    	    return "y";
-    	}
-    	
-    	//12=Criar sala(item com o leilao)=================MODELO===================.
-    	if(pergunta.getTipo()==12)
-    	{
-    		ControleSala controle= new ControleSala(pergunta.getConteudo(),msg.src().toString());
-    		
-    		for (ControleSala item : controleSala)
-    		{
-        		if(item.getItem().equals(controle.getItem()))
-        		{
-        			return "y";
-        		}   			
+	  	//11=Logar usuario =================MODELO===================.
+	  	if(pergunta.getTipo()==11)
+	  	{
+	  	    System.out.println("Logar usuario "+pergunta.getConteudo()+"Senha "+pergunta.getConteudoExtra());    						
+	  	    return "y";
+	  	}
+	  	
+	  	//12=Criar sala(item com o leilao)=================MODELO===================.
+	  	if(pergunta.getTipo()==12)
+	  	{
+	  		ControleSala controle= new ControleSala(pergunta.getConteudo(),msg.src().toString());
+	  		
+	  		for (ControleSala item : controleSala)
+	  		{
+	      		if(item.getItem().equals(controle.getItem()))
+	      		{
+	      			return "y";
+	      		}   			
 			}
-    		
-    		controleSala.add(controle);
-	    	System.out.println("Novo leilao "+pergunta.getConteudo()+"Leiloeiro "+msg.src());
-	    	
-			return "n";
-    	}
-    	
+	  		
+	  		controleSala.add(controle);
+		    	System.out.println("Novo leilao "+pergunta.getConteudo()+"Leiloeiro "+msg.src());
+		    	
+				return "n";
+	  	}
+	  	
     	//15=Cadastrar ganhador, deve ser repassado para o modelo)=================MODELO===================
     	if(pergunta.getTipo()==15)
     	{
@@ -198,8 +211,54 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
     		  		
 	    System.out.println("Ganhador "+pergunta.getConteudo()+" Lance "+pergunta.getConteudoExtra());    						
     	}
+
+    	// 17 - Novo usuario online.=================MODELO===================.
+    	if(pergunta.getTipo()==17)
+    	{
+    		usuariosOnline.add(msg.src());
+    	    System.out.println("Novo usuario "+msg.src());    						
+    	}
+    	
+    	// 18 - Pedir historico do leilao=================MODELO===================.
+    	if(pergunta.getTipo()==18)
+    	{
+    	    System.out.println("Pedir historico do leilao."); 
+    	    return pedirHistorico();
+    	}
     	
         return null;
+    }
+    
+    //pedir historico para o modelo.
+    private String pedirHistorico()
+    {
+	        try {
+	       	 
+	     	    JChannel canalDeComunicacaoModelo=new JChannel();
+	     	    canalDeComunicacaoModelo.connect("Persistencia");
+	     	    canalDeComunicacaoModelo.setReceiver(this);
+	    	    despachante=new MessageDispatcher(canalDeComunicacaoModelo, null, null, this);  
+	  
+	    	     Protocolo prot1=new Protocolo();   
+	             prot1.setConteudo("Pedir historico");
+	             prot1.setResposta(true);
+	             prot1.setTipo(12);
+	        	    	 
+	             String resp= enviaMulticastFirst(prot1).getFirst().toString();
+	             
+	             System.out.println(resp);
+
+	             canalDeComunicacaoModelo.close();
+	             despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);	             
+	        
+	             return resp;
+	             
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	        
+	        return "Erro";
     }
 
   public void viewAccepted(View new_view) {
