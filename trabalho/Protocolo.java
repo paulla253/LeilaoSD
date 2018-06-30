@@ -12,7 +12,7 @@ public class Protocolo implements Serializable {
     //1== é um lance.
     //2== Novo leilao.
     //3== Entrar em um grupo
-    //5==Fim de Leilao.
+    //5== Fim de Leilao.
     
     //Comunicação persistenia: 
     //10=Criar novo usuario

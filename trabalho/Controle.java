@@ -158,7 +158,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
     	if(pergunta.getTipo()==17)
     	{
     		usuariosOnline.add(msg.src());
-    	    System.out.println("Novo usuario"+msg.src());    						
+    	    System.out.println("Novo usuario "+msg.src());    						
     	}
     	
     	// 18 - Pedir historico do leilao=================MODELO===================.
@@ -167,18 +167,33 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
     	    System.out.println("Pedir historico do leilao.");    						
     	}
     	
+    	//11=Logar usuario =================MODELO===================.
+    	if(pergunta.getTipo()==11)
+    	{
+    	    System.out.println("Logar usuario "+pergunta.getConteudo()+"Senha "+pergunta.getConteudoExtra());    						
+    	    return "y";
+    	}
+    	
     	//12=Criar sala(item com o leilao)
     	if(pergunta.getTipo()==12)
     	{
     		Ganhadores ganhador= new Ganhadores(pergunta.getConteudo(),msg.src().toString());
-    		ganhando.add(ganhador);
-    	    System.out.println("Novo leilao"+pergunta.getConteudo()+"Leiloeiro"+msg.src());    						
+    		//if(ganhando.contains(ganhador))
+    		//{
+    		//	return "n";
+    			
+    		//}
+   		
+	    	ganhando.add(ganhador);
+	    	System.out.println("Novo leilao "+pergunta.getConteudo()+"Leiloeiro "+msg.src());
+	    	
+			//return "y";
     	}
     	
     	//15=Cadastrar ganhador, deve ser repassado para o modelo)
     	if(pergunta.getTipo()==15)
     	{
-    	    System.out.println("Ganhador"+pergunta.getConteudo()+"Lance"+pergunta.getConteudoExtra());    						
+	    System.out.println("Ganhador "+pergunta.getConteudo()+"Lance "+pergunta.getConteudoExtra());    						
     	}
     	
     	

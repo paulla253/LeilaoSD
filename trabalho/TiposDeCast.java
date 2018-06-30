@@ -32,6 +32,8 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     //grupo do leilao.
     Vector<Address> grupo = new Vector<Address>();
     
+    String nickname="";
+    
     public static void main(String[] args) throws Exception {
         new TiposDeCast().start();
     }
@@ -39,14 +41,19 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     private void start() throws Exception
     {
 	    JChannel canalDeComunicacaoControle=new JChannel();
-       
+	    
         //carregando o nome do usuario.
         //canalDeComunicacao.setName(loadNickname());
 	    
 	    canalDeComunicacaoControle.connect("XxXControle");
 	    canalDeComunicacaoControle.setReceiver(this);
-	    despachante=new MessageDispatcher(canalDeComunicacaoControle, null, null, this);  
-	  //   
+	    despachante=new MessageDispatcher(canalDeComunicacaoControle, null, null, this);
+	    
+	    nickname=canalDeComunicacaoControle.getName();
+	    
+	    	//pensar uma forma de receber a resposta apenas apenas na parte dos controles
+	    	//controleMenuUsuario(canalDeComunicacaoControle);
+	    
 	     System.out.println("Abre");
 	
 	     Protocolo prot=new Protocolo();   
@@ -55,7 +62,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
          prot.setTipo(17);
          
          try {
-             enviaMulticastnNone(prot);
+             enviaMulticastNone(prot);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -64,7 +71,8 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 	    
 	    
         //Cria o canal de comunicação com uma configuração padrão do JGroups	    
-	    canalDeComunicacao=new JChannel();    
+	    canalDeComunicacao=new JChannel();
+	    canalDeComunicacao.setName(nickname);
         canalDeComunicacao.setReceiver(this);
         despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);  
         
@@ -101,6 +109,25 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 	     }
     }
     
+    private void controleMenuUsuario(JChannel canalComunicacaoControle)
+    {  	
+	     Integer op=1;	     
+	     while(op!=3)
+	     {  
+	    	//menu 
+	    	op=menu_login();
+	    	
+	        switch (op) {
+            case 1:
+            		criarUsuario();
+                break;
+            case 2:
+            		op=logarUsuario(canalComunicacaoControle);
+                break;
+	        }	    
+	     }
+    }
+
     private Integer menu_login()
     {
         System.out.println("Escolha uma Opção:");
@@ -109,6 +136,54 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         System.out.print("-> ");
         
 	    return Integer.parseInt(teclado.nextLine());	
+    }
+    
+    //---------------------------------------------------------------------------------------
+    private void criarUsuario()
+    {
+        System.out.println("Criar novo usuario: ");
+    }
+    
+    private int logarUsuario(JChannel canalComunicacaoControle)
+    {
+        System.out.println("Logar usuario: ");
+        
+        try {
+		     Protocolo prot1=new Protocolo();   
+	         //critenciais deveriam está certa.
+	         prot1.setResposta(false);
+	         prot1.setTipo(11);
+        	
+		    System.out.println("Digite o nome do usuario");
+			String line = "";  
+		  	line=teclado.nextLine();		 
+	        prot1.setConteudo(line);
+	        
+		    System.out.println("Digite a senha do usuario");
+			line = "";  
+		  	line=teclado.nextLine();		 
+	        prot1.setConteudoExtra(line);
+	   	
+	        String resp=enviaMulticastFirst(prot1).toString();
+	        
+	        //System.out.println(resp);
+	        
+			if(resp.contains("y"))
+			{
+				System.out.println("Recebi y");
+		        return 3;
+			}
+			else
+			{
+				System.out.println("Usuario ou senha estão errados.Tente novamente");
+			}
+				        	        
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
+        return 1;
     }
     
     //menu criado.
@@ -129,6 +204,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         try {
        	 
      	    JChannel canalDeComunicacaoControle=new JChannel();
+     	   canalDeComunicacaoControle.setName(nickname);
     	    canalDeComunicacaoControle.connect("XxXControle");
     	    canalDeComunicacaoControle.setReceiver(this);
     	    despachante=new MessageDispatcher(canalDeComunicacaoControle, null, null, this);  
@@ -138,7 +214,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
              prot1.setResposta(false);
              prot1.setTipo(18);
         	    	 
-             enviaMulticastnNone(prot1);
+             enviaMulticastNone(prot1);
              
              canalDeComunicacaoControle.close();
              despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);
@@ -189,6 +265,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
    	  		line=teclado.nextLine();
        	 
      	    JChannel canalDeComunicacaoControle=new JChannel();
+     	    canalDeComunicacaoControle.setName(nickname);
     	    canalDeComunicacaoControle.connect("XxXControle");
     	    canalDeComunicacaoControle.setReceiver(this);
     	    despachante=new MessageDispatcher(canalDeComunicacaoControle, null, null, this);  
@@ -198,7 +275,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
              prot1.setResposta(false);
              prot1.setTipo(12);
         	    	 
-             enviaMulticastnNone(prot1);
+             enviaMulticastNone(prot1);
              
              canalDeComunicacaoControle.close();
              despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);
@@ -214,6 +291,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         try {
         	
      	    JChannel canalDeComunicacaoControle=new JChannel();
+     	   canalDeComunicacaoControle.setName(nickname);
     	    canalDeComunicacaoControle.connect("XxXControle");
     	    canalDeComunicacaoControle.setReceiver(this);
     	    despachante=new MessageDispatcher(canalDeComunicacaoControle, null, null, this);  
@@ -224,7 +302,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
              prot1.setResposta(false);
              prot1.setTipo(15);
         	    	 
-             enviaMulticastnNone(prot1);
+             enviaMulticastNone(prot1);
              
              canalDeComunicacaoControle.close();
              despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);
@@ -302,7 +380,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
                 prot.setResposta(false);
                 prot.setTipo(5); 
                 try {
-					enviaMulticastnNone(prot);
+					enviaMulticastNone(prot);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -379,12 +457,25 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
           opcoes.setMode(ResponseMode.GET_ALL); // espera receber a resposta de TODOS membros (ALL, MAJORITY, FIRST, NONE)
           opcoes.setAnycasting(false);
 
-        despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);
         RspList respList = despachante.castMessage(null, mensagem, opcoes); //MULTICAST
         return respList;
     }
     
-    private void enviaMulticastnNone(Protocolo conteudo) throws Exception{
+    private RspList enviaMulticastFirst(Protocolo conteudo) throws Exception{
+        System.out.println("\nENVIEI a pergunta: " + conteudo.getConteudo());
+
+        Address cluster = null; //endereço null significa TODOS os membros do cluster
+        Message mensagem=new Message(cluster, conteudo);
+
+        RequestOptions opcoes = new RequestOptions();
+          opcoes.setMode(ResponseMode.GET_FIRST); // espera receber a resposta de TODOS membros (ALL, MAJORITY, FIRST, NONE)
+          opcoes.setAnycasting(false);
+
+        RspList respList = despachante.castMessage(null, mensagem, opcoes); //MULTICAST
+        return respList;
+    }
+    
+    private void enviaMulticastNone(Protocolo conteudo) throws Exception{
         System.out.println("\nENVIEI a pergunta: " + conteudo.getConteudo());
 
         Address cluster = null; //endereço null significa TODOS os membros do cluster
@@ -458,6 +549,15 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     public Object handle(Message msg) throws Exception{ // responde requisições recebidas
       Protocolo pergunta = (Protocolo)msg.getObject();
       
+      
+    	//11-Logar com um usuario já existente,deve responder null
+    	//(Controle que tem conexão com o modelo,ficará responsavel por essa parte).
+    	if (pergunta.getTipo()==11)
+    	{
+    		Util.sleep(1000);
+    		return null;     		
+    	}
+      
     	//Diferenciar lance de outras mensagens,lance==1
     	if(pergunta.getTipo()==1)
     	{
@@ -467,6 +567,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     	{
     		System.out.println("Recebi uma msg : " + pergunta.getConteudo()+"\n");
     	}
+    	
     	
 	    String line = "";  
 	    
