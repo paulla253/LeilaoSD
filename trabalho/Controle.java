@@ -221,7 +221,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
         		{
         			//tentar gravar 3 vezes no modelo.(Ganhador,Lance)
         			for (int i = 0; i < 3; i++) {
-        				if(registrarGanhador(pergunta.getConteudo(),pergunta.getConteudoExtra(),item.getItem())
+        				if(registrarGanhador(pergunta.getConteudo(),pergunta.getConteudoExtra(),item.getItem()))
         				{
                 			controleSala.remove(item);
                 			System.out.println("Registrado Ganhador.");
@@ -233,11 +233,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
         		}   			
 			}
     		
-    		return ("Ocorreu um erro nesse leilao.Tente novamente");
-    		
-    		
-    		  		
-	    System.out.println("Ganhador "+" Lance "+pergunta.getConteudoExtra());    						
+    		return ("Ocorreu um erro nesse leilao.Tente novamente");					
     	}
 
     	// 17 - Novo usuario online.=================MODELO===================.
@@ -263,7 +259,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
     
     
     //registrarGanhador.
-    private boolean registrarGanhador(String Ganhador,float Lance,String lance)
+    private boolean registrarGanhador(String ganhador,String lance,String item)
     {
     	boolean resp=false;
     	
@@ -273,8 +269,9 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
     	    canalDeComunicacaoControle.setReceiver(this);
     	    MessageDispatcher  despachante0=new MessageDispatcher(canalDeComunicacaoControle, null, null, this);  
   
-    	     Protocolo prot1=new Protocolo();   
-             prot1.setConteudo("Registrar ganhador");
+    	     Protocolo prot1=new Protocolo();
+    	     prot1.setConteudo(item);
+             prot1.setConteudoExtra("Ganhador : "+ganhador+" Lance "+ lance);
              prot1.setTipo(26);
         	    	 
             String resposta=enviaMulticastFirst(prot1, despachante0).getFirst().toString();
@@ -286,11 +283,6 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
             }
              
              canalDeComunicacaoControle.close();
-             
-
-             
-             //despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);
-             
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

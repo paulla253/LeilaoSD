@@ -300,7 +300,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
              prot1.setConteudo(ganhador.toString());
              prot1.setConteudoExtra(Float.toString(lance));;
              prot1.setResposta(false);
-             prot1.setTipo(15);
+             prot1.setTipo(16);
         	    	 
              enviaMulticastNone(prot1);
              
@@ -334,7 +334,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 	                while(flag){ 
 	                	
 	                	//Esperar chegar novos lances
-	                	Util.sleep(5000);          
+	                	Util.sleep(3000);          
 	
 		                if(NOVO_LANCE>lance)
 		                {
