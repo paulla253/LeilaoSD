@@ -10,12 +10,12 @@ public class Protocolo implements Serializable {
     
     //Tipo:
     //0== Informativo.
-    //1== é um lance.
+    //1== Lance.
     //2== Novo leilao.
     //3== Entrar em um grupo
     //5== Fim de Leilao.
     
-    //Comunicação persistenia: 
+    //Comunicação Controle: 
     //10=Criar novo usuario
     //11=Logar com o usuario
     //12=Criar sala(item com o leilao)
@@ -65,7 +65,5 @@ public class Protocolo implements Serializable {
 	public void setLance(float lance) {
 		this.lance = lance;
 	}
-	
-	
 	
 }

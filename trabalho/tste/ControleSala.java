@@ -1,6 +1,8 @@
 package tste;
 
-public class ControleSala {
+import java.io.Serializable;
+
+public class ControleSala implements Serializable{
 	
 	//não é exatamente ganhador, é os que está ganhando no momento.
     private String usuario;

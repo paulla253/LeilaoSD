@@ -5,9 +5,10 @@ import org.jgroups.util.*;
 import tste.ControleSala;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.*;
 
-public class Controle extends ReceiverAdapter implements RequestHandler {
+public class Controle extends ReceiverAdapter implements RequestHandler,Serializable {
 
     JChannel canalDeComunicacao;
     MessageDispatcher  despachante;
@@ -43,15 +44,21 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
     		try {
             	Protocolo protocolo = new Protocolo();  
                 protocolo.setTipo(90);  
-                state = (State_Controle) enviaUnicastSincronia(canalDeComunicacao.getView().getMembers().get(0), protocolo);
+                state =(State_Controle) enviaUnicastSincronia(canalDeComunicacao.getView().getMembers().get(0), protocolo);
             } catch(Exception e) {
             	System.out.println("ERRO - Não foi possivel iniciar o Controle");
     			System.exit(1);
             }
     	}
     	sincronizando = false;
-    	System.out.println("Persistencia Funcional!");
-	    
+    	System.out.println("Controle Funcional!");
+    	
+    	for (String item : state.usuariosOnline) {
+    		
+    		System.out.println(item);
+			
+		}
+    	
 	    
     	Protocolo prot=new Protocolo();   
          prot.setConteudo("Teste-Controle");
@@ -216,7 +223,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
 	  		
 	  		//olhar com o modelo.
 	  		String resp=criaSalaItemLeilao(pergunta.getConteudo());
-	  		//existe no moelo
+	  		//existe no modelo
 	  		if(resp.contains("y"))
 	  		{
 	  			System.out.println("Modelo");
@@ -245,8 +252,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
         					state.controleSala.remove(item);
                 			System.out.println("Registrado Ganhador.");
         					
-        					return "y";
-        					
+        					return "y";        					
         				}
 					}
         		}   			
@@ -255,7 +261,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
     		return ("Ocorreu um erro nesse leilao.Tente novamente");					
     	}
     	
-    	// 17 = Sincronizar Controle.
+    	// 90 = Sincronizar Controle.
     	if (pergunta.getTipo() == 90) {
     		System.out.println("Sincronizando...");
     		return(state);
@@ -264,7 +270,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
     	// 17 - Novo usuario online.=================MODELO===================.
     	if(pergunta.getTipo()==17)
     	{
-    		state.usuariosOnline.add(msg.src());
+    		state.usuariosOnline.add(msg.src().toString());
     	    System.out.println("Novo usuario "+msg.src());    						
     	}
     	
