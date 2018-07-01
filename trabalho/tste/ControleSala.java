@@ -6,8 +6,17 @@ public class ControleSala {
     private String usuario;
     private String item;
     private String leiloeiro;
+    private String historico;
     
-    public ControleSala(String item,String leiloeiro)
+    public String getHistorico() {
+		return historico;
+	}
+
+	public void setHistorico(String historico) {
+		this.historico = historico;
+	}
+
+	public ControleSala(String item,String leiloeiro)
     {
         this.leiloeiro = leiloeiro;
         this.item = item;

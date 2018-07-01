@@ -2,10 +2,8 @@ import org.jgroups.*;
 import org.jgroups.blocks.*;
 import org.jgroups.util.*;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.util.*;
 
 public class TiposDeCast extends ReceiverAdapter implements RequestHandler {

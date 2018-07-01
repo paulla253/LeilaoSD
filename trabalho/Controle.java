@@ -213,8 +213,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
 	  	
     	//16=Cadastrar ganhador, deve ser repassado para o modelo)=================MODELO===================
     	if(pergunta.getTipo()==16)
-    	{
-    		int id;    		
+    	{  		
     		for (ControleSala item : controleSala)
     		{
         		if(item.getLeiloeiro().equals(msg.src().toString()))
