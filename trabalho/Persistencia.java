@@ -48,8 +48,6 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler, Ser
                 System.err.println( "ERRO: " + e.toString() );
             }
     	
-    	
-    	
     	estado = new State();
         System.out.println(canalDeComunicacao.getView().getMembers().toString());
     	if (canalDeComunicacao.getView().getMembers().size() > 1) {
@@ -75,7 +73,6 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler, Ser
     		}
     	}   
     	System.out.println("Persistencia Funcional!");
-    	System.out.println(estado.nicknames.getNicknames().get("luiz"));
         while(true) {  
             Util.sleep(100);
         }
@@ -295,7 +292,7 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler, Ser
     private RspList enviaMulticast(Protocolo conteudo) throws Exception{
         System.out.println("\nENVIEI a pergunta: " + conteudo.getConteudo());
 
-        Address cluster = null; //endereço null significa TODOS os membros do cluster
+        Address cluster = null; //endereï¿½o null significa TODOS os membros do cluster
         Message mensagem=new Message(cluster, conteudo);
 
         RequestOptions opcoes = new RequestOptions();
