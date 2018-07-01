@@ -115,7 +115,7 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler {
     
     public Object handle(Message msg) throws Exception { 
         Protocolo pergunta = (Protocolo)msg.getObject();
-        System.out.println("Recebi nova msng");
+        System.out.println("Recebi nova msg: "+pergunta.getConteudo());
     
         // 10 = Criar novo usuario 
     	if (pergunta.getTipo() == 10) {
@@ -139,7 +139,18 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler {
     	
         // 12 = Cria Sala
     	if (pergunta.getTipo() == 12) {
-    		if (newSala(Integer.parseInt(pergunta.getConteudo()))) {
+    		
+    		System.out.println("teste-------------------------");
+    		
+    		//return "n";
+    		
+    		boolean a=newSala(Integer.parseInt(pergunta.getConteudo()));
+    		
+    		System.out.println("teste2-------------------------");
+    		
+    		System.out.println(a);
+    		
+    		if (a) {
     	    	System.out.println("Sala Cadastrada: " + pergunta.getConteudo()); 
     	    	return("y");
     	    }
@@ -184,10 +195,15 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler {
         return(false);
     }
 
-    public boolean newSala(int id) {        
+    public boolean newSala(int id) {
+    	
+    	System.out.println("newsalaAntes");
+    	
         if (estado.salas.getSalas().containsKey(id)) {
             return(false); // ACESSO NEGADO - Sala ja existe
         }
+    	System.out.println("newsalaFalse");
+        
         estado.salas.getSalas().put(id, new String(""));
         setSalas();
         return(true); // ACESSO CONCEDIDO - Sala foi cadastrada;

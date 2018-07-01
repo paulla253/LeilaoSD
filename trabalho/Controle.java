@@ -181,20 +181,33 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
 	  	//12=Criar sala(item com o leilao)=================MODELO===================.
 	  	if(pergunta.getTipo()==12)
 	  	{
+	  		//olhar se esta acontecendo o leilao do item no momento
 	  		ControleSala controle= new ControleSala(pergunta.getConteudo(),msg.src().toString());
-	  		
 	  		for (ControleSala item : controleSala)
 	  		{
 	      		if(item.getItem().equals(controle.getItem()))
 	      		{
-	      			return "y";
+	      			System.out.println("Controle");
+	      			return "n";
 	      		}   			
 			}
 	  		
+	  		//olhar com o modelo.
+	  		String resp=criaSalaItemLeilao(pergunta.getConteudo());
+	  		//existe no moelo
+	  		if(resp.contains("y"))
+	  		{
+	  			System.out.println("Modelo");
+	  			return "n";
+	  		}
+	  		
+	  		System.out.println(resp);
+	  		
+	  		//caso não exite no controle, e nem no modelo poderá criar a sala.
 	  		controleSala.add(controle);
-		    	System.out.println("Novo leilao "+pergunta.getConteudo()+"Leiloeiro "+msg.src());
+		    System.out.println("Novo leilao "+pergunta.getConteudo()+"Leiloeiro "+msg.src());
 		    	
-				return "n";
+				return "y";
 	  	}
 	  	
     	//16=Cadastrar ganhador, deve ser repassado para o modelo)=================MODELO===================
@@ -221,7 +234,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
     	    System.out.println("Novo usuario "+msg.src());    						
     	}
     	
-    	// 15 - Pedir item ganhadores=================MODELO===================.
+    	// 15 - Pedir item ganhadores
     	if(pergunta.getTipo()==15)
     	{
     	    System.out.println("Pedir item ganhadores."); 
@@ -245,7 +258,6 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
   
     	     Protocolo prot1=new Protocolo();   
              //prot1.setConteudo(); nao precisa colocar o texto.
-             prot1.setResposta(false);
              prot1.setTipo(15);
         	    	 
             String resp= enviaUnicast(canalDeComunicacaoControle.getView().getMembers().get(0), prot1,despachante0).toString();
@@ -259,6 +271,42 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			}
+	        
+	        return "Erro";
+    }
+    
+    //pedir historico para o modelo.
+    private String criaSalaItemLeilao(String item)
+    {
+        try {
+          	 
+     	    JChannel canalDeComunicacaoControle=new JChannel();
+    	    canalDeComunicacaoControle.connect("XxXPersistencia");
+    	    canalDeComunicacaoControle.setReceiver(this);
+    	    MessageDispatcher despachante0=new MessageDispatcher(canalDeComunicacaoControle, null, null, this);  
+  
+    	     Protocolo prot1=new Protocolo();   
+             prot1.setConteudo(item);
+             prot1.setTipo(12);
+        	    	 
+            String resp= enviaUnicast(canalDeComunicacaoControle.getView().getMembers().get(0), prot1,despachante0).toString();
+             
+             canalDeComunicacaoControle.close();
+             
+             System.out.println("Respostas"+resp);
+             
+             return resp;
+             
+             //despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);
+             
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				
+				System.out.println("Erro : "+e.getMessage());
+				
+			
 			}
 	        
 	        return "Erro";

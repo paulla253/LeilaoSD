@@ -3,10 +3,10 @@
 
 bash compila-e-executa-Persistencia.sh 
 
-sleep 5
+sleep 3
 
 bash compila-e-executaControle.sh
 
-sleep 5
+sleep 3
 
 bash compila-e-executa.sh

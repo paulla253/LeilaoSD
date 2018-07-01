@@ -268,12 +268,12 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 	             prot1.setResposta(true);
 	             prot1.setTipo(12);
 	        	    	 
-	             String resp= enviaMulticastFirst(prot1).getFirst().toString();
+	             String resp= enviaUnicast(canalDeComunicacaoControle.getView().getMembers().get(0),prot1).toString();
 
 	             canalDeComunicacaoControle.close();
 	             despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);	             
 	             
-				if(resp.contains("n"))
+				if(resp.contains("y"))
 				{
 					return true;					
 				}
