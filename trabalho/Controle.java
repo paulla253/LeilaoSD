@@ -1,10 +1,6 @@
 import org.jgroups.*;
 import org.jgroups.blocks.*;
 import org.jgroups.util.*;
-
-import tste.ControleSala;
-
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 
@@ -25,7 +21,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler,Serializ
 
     private void start() throws Exception {
         //Cria o canal de comunicação com uma configuração padrão do JGroups
-	    canalDeComunicacao=new JChannel("cast.xml");    
+	    canalDeComunicacao=new JChannel();    
 	    
         canalDeComunicacao.setReceiver(this);
         despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);  
@@ -53,14 +49,13 @@ public class Controle extends ReceiverAdapter implements RequestHandler,Serializ
     	sincronizando = false;
     	System.out.println("Controle Funcional!");
     	
+    	System.out.println("Funcionarios online: ");
     	for (String item : state.usuariosOnline) {
     		
     		System.out.println(item);
-			
 		}
-    	
-	    
-    	Protocolo prot=new Protocolo();   
+
+    	 Protocolo prot=new Protocolo();   
          prot.setConteudo("Teste-Controle");
          prot.setResposta(false);
          prot.setTipo(0);
@@ -210,32 +205,65 @@ public class Controle extends ReceiverAdapter implements RequestHandler,Serializ
 	  	//12=Criar sala(item com o leilao)
 	  	if(pergunta.getTipo()==12)
 	  	{
-	  		//olhar se esta acontecendo o leilao do item no momento
 	  		ControleSala controle= new ControleSala(pergunta.getConteudo(),msg.src().toString());
-	  		for (ControleSala item : state.controleSala)
+	  		if(msg.src().equals(canalDeComunicacao.getView().getMembers().get(0)))
 	  		{
-	      		if(item.getItem().equals(controle.getItem()))
-	      		{
-	      			System.out.println("Controle");
-	      			return "n";
-	      		}   			
-			}
-	  		
-	  		//olhar com o modelo.
-	  		String resp=criaSalaItemLeilao(pergunta.getConteudo());
-	  		//existe no modelo
-	  		if(resp.contains("y"))
-	  		{
-	  			System.out.println("Modelo");
-		  		//caso não exite no controle, e nem no modelo poderá criar a sala.
+	  			//controle primario mandou resposta para si mesmo.
+	  			if(canalDeComunicacao.getAddress().equals(msg.src()))
+	  			{
+	  				return null;	
+	  			}
+	  			
 	  			state.controleSala.add(controle);
 			    System.out.println("Novo leilao "+pergunta.getConteudo()+"Leiloeiro "+msg.src());
-	  			return "y";
+	  			
 	  		}
-	  		
-	  		System.out.println(resp);
-		    	
-				return "n";
+	  		//se a mensagem recebida nao for do primeiro lembro,devera fazer a acao Controle -> Persistencia
+	  		else
+	  		{		  		
+		  		//olhar se esta acontecendo o leilao do item no momento
+		  		for (ControleSala item : state.controleSala)
+		  		{
+		      		if(item.getItem().equals(controle.getItem()))
+		      		{
+		      			System.out.println("Controle");
+		      			return "n";
+		      		}   			
+				}
+		  		
+		  		//olhar com o modelo.
+		  		String resp=criaSalaItemLeilao(pergunta.getConteudo());
+		  		//existe no modelo
+		  		if(resp.contains("y"))
+		  		{
+		  			System.out.println("Modelo");
+			  		//caso não exite no controle, e nem no modelo poderá criar a sala.
+		  			state.controleSala.add(controle);
+				    System.out.println("Novo leilao "+pergunta.getConteudo()+"Leiloeiro "+msg.src());
+				    
+				    //registrar nos outros controles.  	 
+		            enviaMulticastnNone(pergunta);
+	
+		  			return "y";
+		  		}
+		  		
+		  		System.out.println(resp);
+			    	
+					return "n";
+	  		}
+	  	}
+	  	
+	  	//13=registrarLog
+	  	if(pergunta.getTipo()==13)
+	  	{
+	  		for (ControleSala sala : state.controleSala) {
+	  			
+	  			if(pergunta.getConteudo().equals(sala.getItem()))
+	  			{
+	  				sala.setHistorico("\n"+sala.getHistorico()+pergunta.getConteudoExtra());
+	  				System.out.println((sala.getHistorico()));
+	  			}
+			}
 	  	}
 	  	
     	//16=Cadastrar ganhador, deve ser repassado para o modelo)=================MODELO===================
@@ -287,8 +315,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler,Serializ
     	
         return null;
     }
-    
-    
+        
     //registrarGanhador.
     private boolean registrarGanhador(String ganhador,String lance,String item)
     {
@@ -310,7 +337,6 @@ public class Controle extends ReceiverAdapter implements RequestHandler,Serializ
             if(resposta.contains("y"))
             {
                 resp= true;
-           	
             }
              
              canalDeComunicacaoControle.close();
@@ -342,8 +368,6 @@ public class Controle extends ReceiverAdapter implements RequestHandler,Serializ
              
              return resp;
              
-             //despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);
-             
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -373,8 +397,6 @@ public class Controle extends ReceiverAdapter implements RequestHandler,Serializ
              System.out.println("Respostas"+resp);
              
              return resp;
-             
-             //despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);
              
 			} catch (Exception e) {
 				// TODO Auto-generated catch block

@@ -55,8 +55,6 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 	    
 	    	//pensar uma forma de receber a resposta apenas apenas na parte dos controles
 	    	//controleMenuUsuario(canalDeComunicacaoControle);
-	    
-	     System.out.println("Abre");
 	
 	     Protocolo prot=new Protocolo();   
          prot.setConteudo("Estou online");

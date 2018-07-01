@@ -1,5 +1,3 @@
-package tste;
-
 import java.io.Serializable;
 
 public class ControleSala implements Serializable{
@@ -8,7 +6,7 @@ public class ControleSala implements Serializable{
     private String usuario;
     private String item;
     private String leiloeiro;
-    private String historico;
+    private String historico="Historico";
     
     public String getHistorico() {
 		return historico;

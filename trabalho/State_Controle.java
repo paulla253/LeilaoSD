@@ -1,8 +1,6 @@
 import java.io.Serializable;
 import java.util.Vector;
 
-import tste.ControleSala;
-
 public class State_Controle implements Serializable {
 
 	public Vector<String> usuariosOnline;
