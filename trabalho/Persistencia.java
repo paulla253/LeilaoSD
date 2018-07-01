@@ -37,12 +37,28 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler {
         
         despachante = new MessageDispatcher(canalDeComunicacao, null, null, this);
 
-        canalDeComunicacao.connect("Persistencia");
+        canalDeComunicacao.connect("XxXPersistencia");
         	eventLoop();
         canalDeComunicacao.close();
     }
 
-    private void eventLoop() throws Exception {       
+    private void eventLoop() throws Exception { 
+    	
+
+        try {
+        	Protocolo prot=new Protocolo();
+            prot.setConteudo("teste");
+            prot.setResposta(false);  
+            prot.setTipo(1);  
+        	
+            enviaMulticast(prot);
+
+        }catch(Exception e) {
+                System.err.println( "ERRO: " + e.toString() );
+            }
+    	
+    	
+    	
         estado = new State();
         System.out.println(canalDeComunicacao.getView().getMembers().toString());
     	if (canalDeComunicacao.getView().getMembers().size() > 1) {
@@ -99,6 +115,7 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler {
     
     public Object handle(Message msg) throws Exception { 
         Protocolo pergunta = (Protocolo)msg.getObject();
+        System.out.println("oi");
     
         // 10 = Criar novo usuario 
     	if (pergunta.getTipo() == 10) {
@@ -142,7 +159,7 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler {
     			System.out.println("Ganhador Registrado: " + pergunta.getConteudoExtra()); 
     			return("y");
     		}
-    	    System.out.println("Ganhador n„o Registrado: " + pergunta.getConteudoExtra());  
+    	    System.out.println("Ganhador nao Registrado: " + pergunta.getConteudoExtra());  
     	    return("n");
     	}
     	
@@ -263,6 +280,20 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler {
     	    string = string + "Item = " + entry.getKey() + " / Ganhador = " + entry.getValue() + "\n";
     	}
     	return(string);
+    }
+    
+    private RspList enviaMulticast(Protocolo conteudo) throws Exception{
+        System.out.println("\nENVIEI a pergunta: " + conteudo.getConteudo());
+
+        Address cluster = null; //endere√ßo null significa TODOS os membros do cluster
+        Message mensagem=new Message(cluster, conteudo);
+
+        RequestOptions opcoes = new RequestOptions();
+          opcoes.setMode(ResponseMode.GET_ALL); // espera receber a resposta de TODOS membros (ALL, MAJORITY, FIRST, NONE)
+          opcoes.setAnycasting(false);
+
+        RspList respList = despachante.castMessage(null, mensagem, opcoes); //MULTICAST
+        return respList;
     }
     
 }

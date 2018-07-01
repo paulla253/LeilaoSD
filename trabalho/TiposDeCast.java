@@ -210,7 +210,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     	     Protocolo prot1=new Protocolo();   
              //prot1.setConteudo(); nao precisa colocar o texto.
              prot1.setResposta(false);
-             prot1.setTipo(18);
+             prot1.setTipo(15);
         	    	 
              enviaMulticastNone(prot1);
              

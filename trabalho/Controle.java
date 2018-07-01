@@ -195,8 +195,8 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
 				return "n";
 	  	}
 	  	
-    	//15=Cadastrar ganhador, deve ser repassado para o modelo)=================MODELO===================
-    	if(pergunta.getTipo()==15)
+    	//16=Cadastrar ganhador, deve ser repassado para o modelo)=================MODELO===================
+    	if(pergunta.getTipo()==16)
     	{
     		int id;    		
     		for (ControleSala item : controleSala)
@@ -219,10 +219,10 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
     	    System.out.println("Novo usuario "+msg.src());    						
     	}
     	
-    	// 18 - Pedir historico do leilao=================MODELO===================.
-    	if(pergunta.getTipo()==18)
+    	// 15 - Pedir item ganhadores=================MODELO===================.
+    	if(pergunta.getTipo()==15)
     	{
-    	    System.out.println("Pedir historico do leilao."); 
+    	    System.out.println("Pedir item ganhadores."); 
     	    return pedirHistorico();
     	}
     	
@@ -235,14 +235,13 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
 	        try {
 	       	 
 	     	    JChannel canalDeComunicacaoModelo=new JChannel();
-	     	    canalDeComunicacaoModelo.connect("Persistencia");
+	     	    canalDeComunicacaoModelo.connect("XxXPersistencia");
 	     	    canalDeComunicacaoModelo.setReceiver(this);
 	    	    despachante=new MessageDispatcher(canalDeComunicacaoModelo, null, null, this);  
 	  
 	    	     Protocolo prot1=new Protocolo();   
 	             prot1.setConteudo("Pedir historico");
-	             prot1.setResposta(true);
-	             prot1.setTipo(12);
+	             prot1.setTipo(15);
 	        	    	 
 	             String resp= enviaMulticastFirst(prot1).getFirst().toString();
 	             
