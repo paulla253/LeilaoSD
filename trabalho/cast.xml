@@ -8,8 +8,11 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xmlns="urn:org:jgroups"
         xsi:schemaLocation="urn:org:jgroups http://www.jgroups.org/schema/jgroups.xsd">
-    <UDP/>
-    <PING/>
+    <TCP/>
+    <TCPPING/>
+	<ENCRYPT encrypt_entire_message="false"
+             sym_init="128" sym_algorithm="AES/ECB/PKCS5Padding"
+             asym_init="512" asym_algorithm="RSA"/>
     <FD_SOCK/>
     <FD_ALL/>
     <VERIFY_SUSPECT/>
@@ -18,5 +21,4 @@
     <UNICAST3/>
     <pbcast.GMS/>
     <SEQUENCER />
-    
 </config>
