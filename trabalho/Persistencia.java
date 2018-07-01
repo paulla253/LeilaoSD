@@ -32,7 +32,7 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler {
     }
 
     private void start() throws Exception {
-        canalDeComunicacao = new JChannel("pilha_persistencia.xml");
+        canalDeComunicacao = new JChannel();
         canalDeComunicacao.setReceiver(this);
         
         despachante = new MessageDispatcher(canalDeComunicacao, null, null, this);
@@ -115,7 +115,7 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler {
     
     public Object handle(Message msg) throws Exception { 
         Protocolo pergunta = (Protocolo)msg.getObject();
-        System.out.println("oi");
+        System.out.println("Recebi nova msng");
     
         // 10 = Criar novo usuario 
     	if (pergunta.getTipo() == 10) {
@@ -279,6 +279,10 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler {
     	for (Map.Entry<Integer, String> entry : estado.salas.getSalas().entrySet()) {
     	    string = string + "Item = " + entry.getKey() + " / Ganhador = " + entry.getValue() + "\n";
     	}
+    	
+    	if(string.isEmpty())
+    		string="Nao exite nenhum ganhador";
+    	
     	return(string);
     }
     

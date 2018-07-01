@@ -101,7 +101,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 	        	 	}
                 break;
             case 3:
-            		historicoLeilao();
+            		System.out.println(historicoLeilao());
                 break;
 	        }	    
 	     }
@@ -197,12 +197,13 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 	    return Integer.parseInt(teclado.nextLine());	
     }
     
-    private void historicoLeilao()
+    private String historicoLeilao()
     {
+    	String resp="";
         try {
        	 
      	    JChannel canalDeComunicacaoControle=new JChannel();
-     	   canalDeComunicacaoControle.setName(nickname);
+     	    canalDeComunicacaoControle.setName(nickname);
     	    canalDeComunicacaoControle.connect("XxXControle");
     	    canalDeComunicacaoControle.setReceiver(this);
     	    despachante=new MessageDispatcher(canalDeComunicacaoControle, null, null, this);  
@@ -211,8 +212,8 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
              //prot1.setConteudo(); nao precisa colocar o texto.
              prot1.setResposta(false);
              prot1.setTipo(15);
-        	    	 
-             enviaMulticastNone(prot1);
+             
+             resp= enviaUnicast(canalDeComunicacaoControle.getView().getMembers().get(0), prot1);
              
              canalDeComunicacaoControle.close();
              despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);
@@ -221,6 +222,8 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+    	
+        return resp;
     }
     
     private String loadNickname(JChannel canalComunicacaoControle){ 
@@ -550,7 +553,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
       
     	//11-Logar com um usuario já existente,deve responder null
     	//(Controle que tem conexão com o modelo,ficará responsavel por essa parte).
-    	if (pergunta.getTipo()==11 && pergunta.getTipo()==12)
+    	if (pergunta.getTipo()==11 && pergunta.getTipo()==12 && pergunta.getTipo()==15)
     	{
     		Util.sleep(1000);
     		return null;     		

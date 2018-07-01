@@ -3,13 +3,18 @@
 Ana Paula Fernandes de Souza
 Luiz Eduardo Pereira
 
-bash bash compila-e-executa.sh
+1) Criar arquivo do xml para a visao,controle,modelo contendo ordenacao,multicast conviavel,criptografia.
 
-Opção 1 cria uma sala de leilão
-Opção 2 entra na sala de leilão criada acima
-Apos utilizar a opção 2, digite "y" de yes para iniciar o leilao.
-Opção 4 entra na sala de leilão apos ela ja estar iniciada. É necessario digitar o Address de quem iniciou o leilao, em seguida de um "y".
-Opção 3 sai do programa.
+2) Modelo e controle sincronizadao entre si.(XML)
 
+3) Pedir historico : V ->C -> M (OK)
 
-A Classe Persistencia está em desenvolvimento, e ainda não foi acoplada ao resto do codigo.
+4) Registrar sala de leilao, ganhador :  V ->C -> M
+
+5) Leiloeiro cair.
+
+6) Controle cair
+
+7) Modelo cair.
+
+8) Parte dos usuarios.

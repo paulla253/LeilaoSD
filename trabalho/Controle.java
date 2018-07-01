@@ -49,6 +49,8 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
     	
          Address meuEndereco = canalDeComunicacao.getAddress();
          
+        // System.out.println(pedirHistorico());
+         
     	while(true)
     	{  	    		
             Vector<Address> cluster = new Vector<Address>(canalDeComunicacao.getView().getMembers());
@@ -80,7 +82,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
         return respList;
     }
     
-    private RspList enviaMulticastFirst(Protocolo conteudo) throws Exception{
+    private RspList enviaMulticastFirst(Protocolo conteudo, MessageDispatcher  despachante1) throws Exception{
         System.out.println("\nENVIEI a pergunta: " + conteudo.getConteudo());
 
         Address cluster = null; //endereço null significa TODOS os membros do cluster
@@ -90,7 +92,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
           opcoes.setMode(ResponseMode.GET_FIRST); // espera receber a resposta de TODOS membros (ALL, MAJORITY, FIRST, NONE)
           opcoes.setAnycasting(false);
 
-        RspList respList = despachante.castMessage(null, mensagem, opcoes); //MULTICAST
+        RspList respList = despachante1.castMessage(null, mensagem, opcoes); //MULTICAST
         return respList;
     }
     
@@ -137,7 +139,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
         despachante.castMessage(grupo, mensagem, opcoes); //ANYCAST
     }
 
-        private String enviaUnicast(Address destino, Protocolo conteudo) throws Exception{
+        private String enviaUnicast(Address destino, Protocolo conteudo,MessageDispatcher  despachante1) throws Exception{
             System.out.println("\nENVIEI a pergunta: " + conteudo.getConteudo());
 
             Message mensagem=new Message(destino,conteudo);
@@ -145,7 +147,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
             RequestOptions opcoes = new RequestOptions(); 
               opcoes.setMode(ResponseMode.GET_FIRST); // não espera receber a resposta do destino (ALL, MAJORITY, FIRST, NONE)
 
-            String resp = despachante.sendMessage(mensagem, opcoes); //UNICAST
+            String resp = despachante1.sendMessage(mensagem, opcoes); //UNICAST
 
             return resp;
         } 
@@ -223,7 +225,9 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
     	if(pergunta.getTipo()==15)
     	{
     	    System.out.println("Pedir item ganhadores."); 
-    	    return pedirHistorico();
+    	    String histo=pedirHistorico();
+    	    System.out.println("Historico : "+histo); 
+    	    return histo;
     	}
     	
         return null;
@@ -232,30 +236,30 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
     //pedir historico para o modelo.
     private String pedirHistorico()
     {
-	        try {
-	       	 
-	     	    JChannel canalDeComunicacaoModelo=new JChannel();
-	     	    canalDeComunicacaoModelo.connect("XxXPersistencia");
-	     	    canalDeComunicacaoModelo.setReceiver(this);
-	    	    despachante=new MessageDispatcher(canalDeComunicacaoModelo, null, null, this);  
-	  
-	    	     Protocolo prot1=new Protocolo();   
-	             prot1.setConteudo("Pedir historico");
-	             prot1.setTipo(15);
-	        	    	 
-	             String resp= enviaMulticastFirst(prot1).getFirst().toString();
-	             
-	             System.out.println(resp);
-
-	             canalDeComunicacaoModelo.close();
-	             despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);	             
-	        
-	             return resp;
-	             
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+        try {
+          	 
+     	    JChannel canalDeComunicacaoControle=new JChannel();
+    	    canalDeComunicacaoControle.connect("XxXPersistencia");
+    	    canalDeComunicacaoControle.setReceiver(this);
+    	    MessageDispatcher  despachante0=new MessageDispatcher(canalDeComunicacaoControle, null, null, this);  
+  
+    	     Protocolo prot1=new Protocolo();   
+             //prot1.setConteudo(); nao precisa colocar o texto.
+             prot1.setResposta(false);
+             prot1.setTipo(15);
+        	    	 
+            String resp= enviaUnicast(canalDeComunicacaoControle.getView().getMembers().get(0), prot1,despachante0).toString();
+             
+             canalDeComunicacaoControle.close();
+             
+             return resp;
+             
+             //despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);
+             
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 	        
 	        return "Erro";
     }
