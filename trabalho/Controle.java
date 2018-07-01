@@ -4,6 +4,7 @@ import org.jgroups.util.*;
 
 import tste.ControleSala;
 
+import java.io.IOException;
 import java.util.*;
 
 public class Controle extends ReceiverAdapter implements RequestHandler {
@@ -12,17 +13,16 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
     MessageDispatcher  despachante;
     
     boolean controle=true;
+    boolean sincronizando = false;
 
     //usuarios online
-    Vector<Address> usuariosOnline = new Vector<Address>();
-    Vector<ControleSala> controleSala = new Vector<ControleSala>();
+    State_Controle state;
     
     public static void main(String[] args) throws Exception {
         new Controle().start();
     }
 
-    private void start() throws Exception
-    {
+    private void start() throws Exception {
         //Cria o canal de comunicação com uma configuração padrão do JGroups
 	    canalDeComunicacao=new JChannel();    
 	    
@@ -35,36 +35,44 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
 	     canalDeComunicacao.close();	    
     }
 
-    private void eventLoop()
-    {  	
-	     Protocolo prot=new Protocolo();   
+    private void eventLoop() {  	
+	    sincronizando = true;
+    	state = new State_Controle(); 
+        System.out.println(canalDeComunicacao.getView().getMembers().toString());
+    	if (canalDeComunicacao.getView().getMembers().size() > 1) {
+    		try {
+            	Protocolo protocolo = new Protocolo();  
+                protocolo.setTipo(90);  
+                state = (State_Controle) enviaUnicastSincronia(canalDeComunicacao.getView().getMembers().get(0), protocolo);
+            } catch(Exception e) {
+            	System.out.println("ERRO - Não foi possivel iniciar o Controle");
+    			System.exit(1);
+            }
+    	}
+    	sincronizando = false;
+    	System.out.println("Persistencia Funcional!");
+	    
+	    
+    	Protocolo prot=new Protocolo();   
          prot.setConteudo("Teste-Controle");
          prot.setResposta(false);
          prot.setTipo(0);
-         
          try {
              enviaMulticastnNone(prot);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-    	
          Address meuEndereco = canalDeComunicacao.getAddress();
          
         // System.out.println(pedirHistorico());
          
-    	while(true)
-    	{  	    		
+    	while(true) {  	    		
             Vector<Address> cluster = new Vector<Address>(canalDeComunicacao.getView().getMembers());
             Address primeiroMembro = cluster.elementAt(0);  //0 a N
-
             if( meuEndereco.equals(canalDeComunicacao.getView().getMembers().get(0)) ) {
-            		
             	System.out.println("Eu sou o primeiro.");
-
             }
-    		
-    		
 	        Util.sleep(10000);
     	}
     }
@@ -166,12 +174,24 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
           despachante.sendMessage(mensagem, opcoes);
     }
     
+    private Object enviaUnicastSincronia(Address destino, Protocolo conteudo) throws Exception{
+        Message mensagem = new Message(destino, conteudo);
+        RequestOptions opcoes = new RequestOptions(); 
+        opcoes.setMode(ResponseMode.GET_FIRST);
+        Object resp = despachante.sendMessage(mensagem, opcoes);
+        return resp;
+    } 
+    
   //exibe mensagens recebidas
     public void receive(Message msg) {System.out.println("" + msg.getSrc() + ": " + msg.getObject());}
 
  // responde requisições recebidas de acordo com o tipo.
     public Object handle(Message msg) throws Exception{ 
       Protocolo pergunta = (Protocolo)msg.getObject();
+      
+      while (sincronizando) {
+    	  Util.sleep(100);
+      }
       
 	  	//11=Logar usuario =================MODELO===================.
 	  	if(pergunta.getTipo()==11)
@@ -185,7 +205,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
 	  	{
 	  		//olhar se esta acontecendo o leilao do item no momento
 	  		ControleSala controle= new ControleSala(pergunta.getConteudo(),msg.src().toString());
-	  		for (ControleSala item : controleSala)
+	  		for (ControleSala item : state.controleSala)
 	  		{
 	      		if(item.getItem().equals(controle.getItem()))
 	      		{
@@ -201,7 +221,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
 	  		{
 	  			System.out.println("Modelo");
 		  		//caso não exite no controle, e nem no modelo poderá criar a sala.
-		  		controleSala.add(controle);
+	  			state.controleSala.add(controle);
 			    System.out.println("Novo leilao "+pergunta.getConteudo()+"Leiloeiro "+msg.src());
 	  			return "y";
 	  		}
@@ -214,7 +234,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
     	//16=Cadastrar ganhador, deve ser repassado para o modelo)=================MODELO===================
     	if(pergunta.getTipo()==16)
     	{  		
-    		for (ControleSala item : controleSala)
+    		for (ControleSala item : state.controleSala)
     		{
         		if(item.getLeiloeiro().equals(msg.src().toString()))
         		{
@@ -222,7 +242,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
         			for (int i = 0; i < 3; i++) {
         				if(registrarGanhador(pergunta.getConteudo(),pergunta.getConteudoExtra(),item.getItem()))
         				{
-                			controleSala.remove(item);
+        					state.controleSala.remove(item);
                 			System.out.println("Registrado Ganhador.");
         					
         					return "y";
@@ -234,11 +254,17 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
     		
     		return ("Ocorreu um erro nesse leilao.Tente novamente");					
     	}
+    	
+    	// 17 = Sincronizar Controle.
+    	if (pergunta.getTipo() == 90) {
+    		System.out.println("Sincronizando...");
+    		return(state);
+    	}
 
     	// 17 - Novo usuario online.=================MODELO===================.
     	if(pergunta.getTipo()==17)
     	{
-    		usuariosOnline.add(msg.src());
+    		state.usuariosOnline.add(msg.src());
     	    System.out.println("Novo usuario "+msg.src());    						
     	}
     	
