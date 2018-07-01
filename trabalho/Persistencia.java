@@ -52,13 +52,9 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler, Ser
                 System.err.println( "ERRO: " + e.toString() );
             }
     	
-<<<<<<< HEAD
-    	
+   	
     	sincronizando=true;
-    	
-    	
-=======
->>>>>>> 6a10a3c3d7a7bdb9522039ac7a6c2fcdcbb9c08d
+
     	estado = new State();
         System.out.println(canalDeComunicacao.getView().getMembers().toString());
     	if (canalDeComunicacao.getView().getMembers().size() > 1) {
