@@ -25,7 +25,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler,Serializ
 
     private void start() throws Exception {
         //Cria o canal de comunicação com uma configuração padrão do JGroups
-	    canalDeComunicacao=new JChannel();    
+	    canalDeComunicacao=new JChannel("cast.xml");    
 	    
         canalDeComunicacao.setReceiver(this);
         despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);  
