@@ -17,6 +17,8 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler, Ser
     JChannel canalDeComunicacao;
     MessageDispatcher despachante; 
     State estado;
+    boolean sincronizando=false;
+    
 
     public static void main(String[] args) throws Exception {
         new Persistencia().start();
@@ -36,6 +38,8 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler, Ser
     private void eventLoop() throws Exception {   
         
     	
+    	
+    	
     	try {
         	Protocolo prot=new Protocolo();
             prot.setConteudo("teste");
@@ -48,6 +52,8 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler, Ser
                 System.err.println( "ERRO: " + e.toString() );
             }
     	
+    	
+    	sincronizando=true;
     	
     	
     	estado = new State();
@@ -73,27 +79,32 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler, Ser
     			System.out.println("ERRO - Não foi possivel iniciar a Persistencia");
     			System.exit(1);
     		}
-    	}   
+    	} 
+    	sincronizando=false;
     	System.out.println("Persistencia Funcional!");
-    	System.out.println(estado.nicknames.getNicknames().get("luiz"));
         while(true) {  
             Util.sleep(100);
         }
     }
     
     //Comunicação persistenia: 
-    //10=Criar novo usuario
-    //11=Logar com o usuario
-    //12=Criar sala(item com o leilao)
-    //15=Listar itens ganhadores.
-    //16=Registrar Ganhador.
-    //17=Sincronizar Persistencias
+    //20=Criar novo usuario
+    //21=Logar com o usuario
+    //22=Criar sala(item com o leilao)
+    //25=Listar itens ganhadores.
+    //26=Registrar Ganhador.
+    //27=Sincronizar Persistencias
     
     public Object handle(Message msg) throws Exception { 
     	Protocolo pergunta = (Protocolo)msg.getObject();
+    	
+    	while(sincronizando)
+    	{
+    		Util.sleep(100);
+    	}
     
-        // 10 = Criar novo usuario 
-    	if (pergunta.getTipo() == 10) {
+        // 20 = Criar novo usuario 
+    	if (pergunta.getTipo() == 20) {
     	    if (criarNickname(pergunta.getConteudo(), pergunta.getConteudoExtra())) {
     	    	System.out.println("Usuario Cadastrado: " + pergunta.getConteudo()); 
     	    	return("y");
@@ -102,8 +113,8 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler, Ser
     	    return("n");    	
     	}
     	
-        // 11 = Logar com o usuario
-    	if (pergunta.getTipo() == 11) {
+        // 21 = Logar com o usuario
+    	if (pergunta.getTipo() == 21) {
     		if (loginNickname(pergunta.getConteudo(), pergunta.getConteudoExtra())) {
     	    	System.out.println("Acesso Permitido: " + pergunta.getConteudo()); 
     	    	return("y");
@@ -112,8 +123,8 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler, Ser
     	    return("n");    	
     	}
     	
-        // 12 = Cria Sala
-    	if (pergunta.getTipo() == 12) {
+        // 22 = Cria Sala
+    	if (pergunta.getTipo() == 22) {
     		if (newSala(Integer.parseInt(pergunta.getConteudo()))) {
     	    	System.out.println("Sala Cadastrada: " + pergunta.getConteudo()); 
     	    	return("y");
@@ -122,14 +133,14 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler, Ser
     	    return("n");    	
     	}
     	
-    	// 15 = Listar itens ganhadores.
-    	if (pergunta.getTipo() == 15) {
+    	// 25 = Listar itens ganhadores.
+    	if (pergunta.getTipo() == 25) {
     		System.out.println("Itens/Ganhadores Enviado");
     		return(getItemGanhador());   						
     	}
     	
-    	// 16 = Registrar Ganhador.
-    	if (pergunta.getTipo() == 16) {
+    	// 26 = Registrar Ganhador.
+    	if (pergunta.getTipo() == 26) {
     		if (setGanhador(Integer.parseInt(pergunta.getConteudo()), pergunta.getConteudoExtra())) {
     			System.out.println("Ganhador Registrado: " + pergunta.getConteudoExtra()); 
     			return("y");
@@ -295,7 +306,7 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler, Ser
     private RspList enviaMulticast(Protocolo conteudo) throws Exception{
         System.out.println("\nENVIEI a pergunta: " + conteudo.getConteudo());
 
-        Address cluster = null; //endere�o null significa TODOS os membros do cluster
+        Address cluster = null; //endere�o null significa TODOS os membros do cluster
         Message mensagem=new Message(cluster, conteudo);
 
         RequestOptions opcoes = new RequestOptions();

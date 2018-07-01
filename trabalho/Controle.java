@@ -10,6 +10,8 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
 
     JChannel canalDeComunicacao;
     MessageDispatcher  despachante;
+    
+    boolean controle=true;
 
     //usuarios online
     Vector<Address> usuariosOnline = new Vector<Address>();
@@ -198,16 +200,15 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
 	  		if(resp.contains("y"))
 	  		{
 	  			System.out.println("Modelo");
-	  			return "n";
+		  		//caso não exite no controle, e nem no modelo poderá criar a sala.
+		  		controleSala.add(controle);
+			    System.out.println("Novo leilao "+pergunta.getConteudo()+"Leiloeiro "+msg.src());
+	  			return "y";
 	  		}
 	  		
 	  		System.out.println(resp);
-	  		
-	  		//caso não exite no controle, e nem no modelo poderá criar a sala.
-	  		controleSala.add(controle);
-		    System.out.println("Novo leilao "+pergunta.getConteudo()+"Leiloeiro "+msg.src());
 		    	
-				return "y";
+				return "n";
 	  	}
 	  	
     	//16=Cadastrar ganhador, deve ser repassado para o modelo)=================MODELO===================
@@ -243,6 +244,8 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
     	    return histo;
     	}
     	
+    	Util.sleep(1000);
+    	
         return null;
     }
     
@@ -257,10 +260,10 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
     	    MessageDispatcher  despachante0=new MessageDispatcher(canalDeComunicacaoControle, null, null, this);  
   
     	     Protocolo prot1=new Protocolo();   
-             //prot1.setConteudo(); nao precisa colocar o texto.
-             prot1.setTipo(15);
+             prot1.setConteudo("Pedir historico");
+             prot1.setTipo(25);
         	    	 
-            String resp= enviaUnicast(canalDeComunicacaoControle.getView().getMembers().get(0), prot1,despachante0).toString();
+            String resp= enviaMulticastFirst(prot1, despachante0).getFirst().toString();
              
              canalDeComunicacaoControle.close();
              
@@ -288,9 +291,9 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
   
     	     Protocolo prot1=new Protocolo();   
              prot1.setConteudo(item);
-             prot1.setTipo(12);
+             prot1.setTipo(22);
         	    	 
-            String resp= enviaUnicast(canalDeComunicacaoControle.getView().getMembers().get(0), prot1,despachante0).toString();
+            String resp= enviaMulticastFirst(prot1, despachante0).getFirst().toString();
              
              canalDeComunicacaoControle.close();
              
