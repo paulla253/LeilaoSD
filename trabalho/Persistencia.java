@@ -2,26 +2,17 @@ import org.jgroups.*;
 import org.jgroups.blocks.*;
 import org.jgroups.util.*;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-
+import java.io.Serializable;
 import java.security.MessageDigest;
 import java.util.Map;
 
-/*POR FAZER:
-    SINCRONIZAR PERSISTENCIAS
-    MODO PERSISTENICA OU MODO INVASOR
-*/
-
-public class Persistencia extends ReceiverAdapter implements RequestHandler {
+public class Persistencia extends ReceiverAdapter implements RequestHandler, Serializable {
 
     JChannel canalDeComunicacao;
     MessageDispatcher despachante; 
@@ -42,10 +33,10 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler {
         canalDeComunicacao.close();
     }
 
-    private void eventLoop() throws Exception { 
+    private void eventLoop() throws Exception {   
+        
     	
-
-        try {
+    	try {
         	Protocolo prot=new Protocolo();
             prot.setConteudo("teste");
             prot.setResposta(false);  
@@ -59,50 +50,34 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler {
     	
     	
     	
-        estado = new State();
+    	estado = new State();
         System.out.println(canalDeComunicacao.getView().getMembers().toString());
     	if (canalDeComunicacao.getView().getMembers().size() > 1) {
-        	canalDeComunicacao.getState(null, 10000);
-        	loginNickname("luiz","123");
-    	} 
+    		try {
+            	Protocolo protocolo = new Protocolo();  
+                protocolo.setTipo(17);  
+                estado = (State) enviaUnicast(canalDeComunicacao.getView().getMembers().get(0), protocolo);
+                gravaState();
+            } catch(Exception e) {
+            	System.out.println("ERRO - Não foi possivel iniciar a Persistencia");
+    			System.exit(1);
+            }
+    	}
     	else {
     		try {
             	System.out.println("Loading Nicknames..."); 
     			getNicknames();
     			System.out.println("Loading Salas..."); 
     	        getSalas();
-    	        criarNickname("luiz", "123");
     		} catch (IOException e) {
     			System.out.println("ERRO - Não foi possivel iniciar a Persistencia");
     			System.exit(1);
     		}
     	}   
-        System.out.println("Persistencia Operacional!");   
-
+    	System.out.println("Persistencia Funcional!");
+    	System.out.println(estado.nicknames.getNicknames().get("luiz"));
         while(true) {  
             Util.sleep(100);
-        }
-    }
-
-  /*
-   * 10 - Criar novo usuario
-   * 11 - Logar com usuario
-   * 12 - Criar sala
-   * 13 - Listar Itens/Ganhadores
-   * 14 - Registrar Ganhador
-  */
-    
-    public void getState(OutputStream output) throws Exception {
-        synchronized(estado) {
-            Util.objectToStream(estado, new DataOutputStream(output));
-        }
-    }
-    
-    public void setState(InputStream input) throws Exception {
-        State state;
-        state = (State) Util.objectFromStream(new DataInputStream(input));
-        synchronized(estado) {
-            estado = state;
         }
     }
     
@@ -112,10 +87,10 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler {
     //12=Criar sala(item com o leilao)
     //15=Listar itens ganhadores.
     //16=Registrar Ganhador.
+    //17=Sincronizar Persistencias
     
     public Object handle(Message msg) throws Exception { 
-        Protocolo pergunta = (Protocolo)msg.getObject();
-        System.out.println("Recebi nova msg: "+pergunta.getConteudo());
+    	Protocolo pergunta = (Protocolo)msg.getObject();
     
         // 10 = Criar novo usuario 
     	if (pergunta.getTipo() == 10) {
@@ -139,18 +114,7 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler {
     	
         // 12 = Cria Sala
     	if (pergunta.getTipo() == 12) {
-    		
-    		System.out.println("teste-------------------------");
-    		
-    		//return "n";
-    		
-    		boolean a=newSala(Integer.parseInt(pergunta.getConteudo()));
-    		
-    		System.out.println("teste2-------------------------");
-    		
-    		System.out.println(a);
-    		
-    		if (a) {
+    		if (newSala(Integer.parseInt(pergunta.getConteudo()))) {
     	    	System.out.println("Sala Cadastrada: " + pergunta.getConteudo()); 
     	    	return("y");
     	    }
@@ -174,6 +138,12 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler {
     	    return("n");
     	}
     	
+    	// 17 = Sincronizar Persistencias.
+    	if (pergunta.getTipo() == 17) {
+    		System.out.println("Sincronizando...");
+    		return(estado);
+    	}
+    		
         return(null);
     }
 
@@ -195,15 +165,10 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler {
         return(false);
     }
 
-    public boolean newSala(int id) {
-    	
-    	System.out.println("newsalaAntes");
-    	
+    public boolean newSala(int id) {        
         if (estado.salas.getSalas().containsKey(id)) {
             return(false); // ACESSO NEGADO - Sala ja existe
         }
-    	System.out.println("newsalaFalse");
-        
         estado.salas.getSalas().put(id, new String(""));
         setSalas();
         return(true); // ACESSO CONCEDIDO - Sala foi cadastrada;
@@ -295,17 +260,42 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler {
     	for (Map.Entry<Integer, String> entry : estado.salas.getSalas().entrySet()) {
     	    string = string + "Item = " + entry.getKey() + " / Ganhador = " + entry.getValue() + "\n";
     	}
-    	
-    	if(string.isEmpty())
-    		string="Nao exite nenhum ganhador";
-    	
+    	if(string.isEmpty()) {
+    		string = "Nao existe nenhum ganhador!";
+    	}
     	return(string);
     }
+    
+    private void gravaState() {
+    	try {
+        	ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("salas.txt"));
+            out.writeObject(estado.salas);
+            out.close();
+        } catch (Exception e) {
+            System.out.println("ERRO: setSalas()");
+        }
+    	try {
+        	ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("nicknames.txt"));
+            out.writeObject(estado.nicknames); 
+            out.close();  
+        } catch (Exception e) {
+            System.out.println("ERRO: setNicknames()");
+        }
+    	return;
+    }
+    
+    private Object enviaUnicast(Address destino, Protocolo conteudo) throws Exception{
+        Message mensagem = new Message(destino, conteudo);
+        RequestOptions opcoes = new RequestOptions(); 
+        opcoes.setMode(ResponseMode.GET_FIRST);
+        Object resp = despachante.sendMessage(mensagem, opcoes);
+        return resp;
+    } 
     
     private RspList enviaMulticast(Protocolo conteudo) throws Exception{
         System.out.println("\nENVIEI a pergunta: " + conteudo.getConteudo());
 
-        Address cluster = null; //endereço null significa TODOS os membros do cluster
+        Address cluster = null; //endere�o null significa TODOS os membros do cluster
         Message mensagem=new Message(cluster, conteudo);
 
         RequestOptions opcoes = new RequestOptions();
@@ -352,3 +342,19 @@ public String getLog(int sala) {
     return(log);
 }
 */
+
+/*
+public void getState(OutputStream output) throws Exception {
+    synchronized(estado) {
+        Util.objectToStream(estado, new DataOutputStream(output));
+    }
+}
+
+public void setState(InputStream input) throws Exception {
+    State state;
+    System.out.println("ENTREI AQUI");
+    state = (State) Util.objectFromStream(new DataInputStream(input));
+    synchronized(estado) {
+        estado = state;
+    }
+}*/
