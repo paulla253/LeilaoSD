@@ -5,6 +5,7 @@ public class Protocolo implements Serializable {
     private boolean resposta;
     private String conteudo;
     private String conteudoExtra;
+    private float lance;
     private int tipo;
     
     //Tipo:
@@ -56,4 +57,15 @@ public class Protocolo implements Serializable {
 	public void setTipo(int tipo) {
         this.tipo=tipo;
     }
+
+	public float getLance() {
+		return lance;
+	}
+
+	public void setLance(float lance) {
+		this.lance = lance;
+	}
+	
+	
+	
 }

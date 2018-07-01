@@ -180,7 +180,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
 	  	    return "y";
 	  	}
 	  	
-	  	//12=Criar sala(item com o leilao)=================MODELO===================.
+	  	//12=Criar sala(item com o leilao)
 	  	if(pergunta.getTipo()==12)
 	  	{
 	  		//olhar se esta acontecendo o leilao do item no momento
@@ -219,13 +219,25 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
     		{
         		if(item.getLeiloeiro().equals(msg.src().toString()))
         		{
-        			controleSala.remove(item);
-        			System.out.println("Encontrou o item");
-        			break;
+        			//tentar gravar 3 vezes no modelo.(Ganhador,Lance)
+        			for (int i = 0; i < 3; i++) {
+        				if(registrarGanhador(pergunta.getConteudo(),pergunta.getConteudoExtra(),item.getItem())
+        				{
+                			controleSala.remove(item);
+                			System.out.println("Registrado Ganhador.");
+        					
+        					return "y";
+        					
+        				}
+					}
         		}   			
 			}
+    		
+    		return ("Ocorreu um erro nesse leilao.Tente novamente");
+    		
+    		
     		  		
-	    System.out.println("Ganhador "+pergunta.getConteudo()+" Lance "+pergunta.getConteudoExtra());    						
+	    System.out.println("Ganhador "+" Lance "+pergunta.getConteudoExtra());    						
     	}
 
     	// 17 - Novo usuario online.=================MODELO===================.
@@ -247,6 +259,44 @@ public class Controle extends ReceiverAdapter implements RequestHandler {
     	Util.sleep(1000);
     	
         return null;
+    }
+    
+    
+    //registrarGanhador.
+    private boolean registrarGanhador(String Ganhador,float Lance,String lance)
+    {
+    	boolean resp=false;
+    	
+        try {          	 
+     	    JChannel canalDeComunicacaoControle=new JChannel();
+    	    canalDeComunicacaoControle.connect("XxXPersistencia");
+    	    canalDeComunicacaoControle.setReceiver(this);
+    	    MessageDispatcher  despachante0=new MessageDispatcher(canalDeComunicacaoControle, null, null, this);  
+  
+    	     Protocolo prot1=new Protocolo();   
+             prot1.setConteudo("Registrar ganhador");
+             prot1.setTipo(26);
+        	    	 
+            String resposta=enviaMulticastFirst(prot1, despachante0).getFirst().toString();
+            
+            if(resposta.contains("y"))
+            {
+                resp= true;
+           	
+            }
+             
+             canalDeComunicacaoControle.close();
+             
+
+             
+             //despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);
+             
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	        
+	        return resp;
     }
     
     //pedir historico para o modelo.
