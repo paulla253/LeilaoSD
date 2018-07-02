@@ -59,8 +59,8 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 	        }
 	        else
 	        {
+	        	System.out.println("Arquivo existe");
 	        	loadNickname();
-	        	System.out.println(nickname);
 	        }
 	
 	     Protocolo prot=new Protocolo();   
@@ -83,6 +83,12 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);  
         
         canalDeComunicacao.connect("XxXLeilao");
+        
+        //olhando a existencia do arquivo.
+        if(nicknameFile.exists()){
+        	System.out.println("Arquivo existe");
+        	recuperarSecao();
+        }
 
            eventLoop();
         canalDeComunicacao.close();
@@ -148,7 +154,8 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 	        		{
 	        			op=3;
 	        			criaArquivoNickname();
-	        		}           	
+	        		}
+            	
                 break;
 	        }	    
 	     }
@@ -381,8 +388,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     //Leiloeiro->Controle para RegistrarLog.
     private void registrarLog(String ganhador,String lance)
     {
-	        try {	        	
-	       	 
+	        try {	        	 
 	     	    JChannel canalDeComunicacaoControle=new JChannel();
 	     	    canalDeComunicacaoControle.setName(nickname);
 	    	    canalDeComunicacaoControle.connect("XxXControle");
@@ -452,7 +458,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 	                while(flag){ 
 	                	
 	                	//Esperar chegar novos lances
-	                	Util.sleep(3000);          
+	                	Util.sleep(10000);          
 	
 		                if(NOVO_LANCE>lance)
 		                {
@@ -508,6 +514,33 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     	else
     		System.out.println("Esse item esta sendo leiloado");	                
     }
+
+    //recuperar secao quando cair. 
+    private void recuperarSecao()
+    {   	
+    				System.out.println("Recuperar secao : ");
+					Protocolo prot=new Protocolo();
+			        prot.setResposta(false);
+			        prot.setConteudo("Participo de algum leilao?");
+			        prot.setTipo(6); 
+					
+					try {
+						//composicao do JChannel.
+						Vector<Address> cluster = new Vector<Address>(canalDeComunicacao.getView().getMembers());
+						
+						RspList resp = enviaMulticast(prot);
+						
+						
+		                for (int i = 0; i < cluster.size(); i++)
+		                {
+		                	 System.out.println("ID : "+cluster.elementAt(i)+" Valor:"+resp.getValue(cluster.elementAt(i)));
+		                }
+		               
+
+                }catch(Exception e) {
+                        System.err.println( "ERRO: " + e.toString() );
+                    }
+    }          
     
     //participar do leilao. 
     private void participarLeilao(){
@@ -673,6 +706,23 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     		Util.sleep(1000);
     		return null;     		
     	}
+    	
+    	//Olhar se o msg.src pertence a algum grupo.
+    	if (pergunta.getTipo()==6)
+    	{
+    			System.out.println(msg.src());
+    			System.out.println(grupo.get(0));
+    			
+    			for (Address address : grupo)
+    			{
+            		if(address.toString().equals(msg.src().toString()))
+            		{
+            				return "y";
+            		}	
+				}
+    		Util.sleep(100);
+    		return "n";     		
+    	}
       
     	//Diferenciar lance de outras mensagens,lance==1
     	if(pergunta.getTipo()==1)
@@ -689,15 +739,14 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
   		
       	//pedir para entrar no leilao
       	if(pergunta.getTipo()==3)
-      	{
-      		System.out.println("Teste");
-      		
+      	{      		
       		if(leilao) {
-          		grupo.add(msg.getSrc());     			
+          		grupo.add(msg.getSrc());
+          		System.out.println("Adicionou"+msg.getSrc());
       			return "y";
       		}
-      		else
-      			return "n";
+      		
+      		return "n";
       	}
       	
       	if(pergunta.getTipo()==5)

@@ -14,6 +14,7 @@ public class Protocolo implements Serializable {
     //2== Novo leilao.
     //3== Entrar em um grupo
     //5== Fim de Leilao.
+    //6== Participo de algum Leilao?
     
     //Comunicação Controle: 
     //10=Criar novo usuario

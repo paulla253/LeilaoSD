@@ -110,6 +110,9 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler, Ser
     	
         // 21 = Logar com o usuario
     	if (pergunta.getTipo() == 21) {
+    		
+    		
+    		
     		if (loginNickname(pergunta.getConteudo(), pergunta.getConteudoExtra())) {
     	    	System.out.println("Acesso Permitido: " + pergunta.getConteudo()); 
     	    	return("y");

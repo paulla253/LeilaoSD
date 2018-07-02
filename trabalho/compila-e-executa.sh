@@ -19,7 +19,7 @@ xterm -hold -e "$RUN_CMD"  &
 sleep 1
 
 ## executar outras 3 janelas neste computador
-xterm -hold -e "$RUN_CMD"  &
+##xterm -hold -e "$RUN_CMD"  &
 ##xterm -hold -e "$RUN_CMD"  &
 ##xterm -hold -e "$RUN_CMD"  &
 

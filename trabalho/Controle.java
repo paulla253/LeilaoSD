@@ -217,7 +217,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler,Serializ
 	  	}
 	  	
 	  	//12=Criar sala(item com o leilao)
-	  	if(pergunta.getTipo()==21)
+	  	if(pergunta.getTipo()==12)
 	  	{
 	  		ControleSala controle= new ControleSala(pergunta.getConteudo(),msg.src().toString());
 	  		if(msg.src().equals(canalDeComunicacao.getView().getMembers().get(0)))
