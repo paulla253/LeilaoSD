@@ -50,7 +50,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 	    JChannel canalDeComunicacaoControle=new JChannel("teste.xml");	        
 	    canalDeComunicacaoControle.connect("XxXControle");
 	    canalDeComunicacaoControle.setReceiver(this);
-	    despachante=new MessageDispatcher(canalDeComunicacaoControle, null, null, this);
+	    despachante=new MessageDispatcher(canalDeComunicacaoControle, null, this, this);
 	    
 	    nickname=canalDeComunicacaoControle.getName();
 	    
@@ -83,7 +83,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 	    canalDeComunicacao=new JChannel("teste.xml");
 	    canalDeComunicacao.setName(nickname);
         canalDeComunicacao.setReceiver(this);
-        despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);  
+        despachante=new MessageDispatcher(canalDeComunicacao, null, this, this);  
         
         canalDeComunicacao.connect("XxXLeilao");
         
@@ -647,7 +647,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
           opcoes.setMode(ResponseMode.GET_MAJORITY); // espera receber a resposta da maioria do grupo (ALL, MAJORITY, FIRST, NONE)
           opcoes.setAnycasting(true);
         
-        despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);   
+        despachante=new MessageDispatcher(canalDeComunicacao, null, this, this);   
         RspList respList = despachante.castMessage(grupo, mensagem, opcoes); //ANYCAST
         System.out.println("==> Respostas do grupo ao ANYCAST:\n" +respList+"\n");
 

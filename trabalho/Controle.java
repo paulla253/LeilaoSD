@@ -24,7 +24,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler,Serializ
 	    canalDeComunicacao=new JChannel("teste.xml");    
 	    
         canalDeComunicacao.setReceiver(this);
-        despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);  
+        despachante=new MessageDispatcher(canalDeComunicacao, null, this, this);  
 	    	    
 	     canalDeComunicacao.connect("XxXControle");
 	
@@ -89,7 +89,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler,Serializ
           opcoes.setMode(ResponseMode.GET_ALL); // espera receber a resposta de TODOS membros (ALL, MAJORITY, FIRST, NONE)
           opcoes.setAnycasting(false);
 
-        despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);
+        despachante=new MessageDispatcher(canalDeComunicacao, null, this, this);
         RspList respList = despachante.castMessage(null, mensagem, opcoes); //MULTICAST
         return respList;
     }
@@ -118,7 +118,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler,Serializ
           opcoes.setMode(ResponseMode.GET_NONE); // espera receber a resposta de TODOS membros (ALL, MAJORITY, FIRST, NONE)
           opcoes.setAnycasting(false);
           
-        despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);
+        despachante=new MessageDispatcher(canalDeComunicacao, null, this, this);
         despachante.castMessage(null, mensagem, opcoes); //MULTICAST
     }
 
@@ -131,7 +131,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler,Serializ
           opcoes.setMode(ResponseMode.GET_MAJORITY); // espera receber a resposta da maioria do grupo (ALL, MAJORITY, FIRST, NONE)
           opcoes.setAnycasting(true);
         
-        despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);   
+        despachante=new MessageDispatcher(canalDeComunicacao, null, this, this);   
         RspList respList = despachante.castMessage(grupo, mensagem, opcoes); //ANYCAST
         System.out.println("==> Respostas do grupo ao ANYCAST:\n" +respList+"\n");
 
@@ -147,7 +147,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler,Serializ
         opcoes.setMode(ResponseMode.GET_NONE); // espera receber a resposta da maioria do grupo (ALL, MAJORITY, FIRST, NONE)
         opcoes.setAnycasting(true);
 
-       // despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);
+       // despachante=new MessageDispatcher(canalDeComunicacao, null, this, this);
         despachante.castMessage(grupo, mensagem, opcoes); //ANYCAST
     }
 
@@ -172,7 +172,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler,Serializ
         RequestOptions opcoes = new RequestOptions();
           opcoes.setMode(ResponseMode.GET_NONE); // não espera receber a resposta do destino (ALL, MAJORITY, FIRST, NONE)
 
-         // despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);
+         // despachante=new MessageDispatcher(canalDeComunicacao, null, this, this);
           despachante.sendMessage(mensagem, opcoes);
     }
     

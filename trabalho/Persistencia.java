@@ -28,7 +28,7 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler, Ser
         canalDeComunicacao = new JChannel("teste.xml");
         canalDeComunicacao.setReceiver(this);
         
-        despachante = new MessageDispatcher(canalDeComunicacao, null, null, this);
+        despachante = new MessageDispatcher(canalDeComunicacao, null, this, this);
 
         canalDeComunicacao.connect("XxXPersistencia");
         	eventLoop();
@@ -314,6 +314,10 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler, Ser
         RspList respList = despachante.castMessage(null, mensagem, opcoes); //MULTICAST
         return respList;
     }
+
+      public void viewAccepted(View new_view) {
+            System.out.println("\t** nova View do cluster: " + new_view);
+        }
     
 }
 
