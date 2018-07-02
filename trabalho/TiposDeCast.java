@@ -53,8 +53,17 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 	    
 	    nickname=canalDeComunicacaoControle.getName();
 	    
-	    	//pensar uma forma de receber a resposta apenas apenas na parte dos controles
-	    	//controleMenuUsuario(canalDeComunicacaoControle);
+        	File nicknameFile = new File("nickname.txt");
+
+	        //olhando a existencia do arquivo.
+	        if(!nicknameFile.exists()){
+	        	controleMenuUsuario(canalDeComunicacaoControle);
+	        }
+	        else
+	        {
+	        	loadNickname();
+	        	System.out.println(nickname);
+	        }
 	
 	     Protocolo prot=new Protocolo();   
          prot.setConteudo("Estou online");
@@ -104,6 +113,18 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
             case 3:
             		System.out.println(historicoLeilao());
                 break;
+            case 4:
+            		boolean success = (new File("nickname.txt")).delete();           	
+            		if(success)
+            		{
+            			System.out.println("Deslogado com sucesso.Inicie o aplicativo Novamente");
+            		}
+            		else
+            			
+            			System.out.println("Aconteceu um erro, tente novamente mais tarde");           	
+            	break;
+                
+                
 	        }	    
 	     }
     }
@@ -227,27 +248,19 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         return resp;
     }
     
-    private String loadNickname(JChannel canalComunicacaoControle){ 
+    private void loadNickname(){ 
     	
-    	String nickname=null;
-        File nicknameFile = new File("nickname.txt");
-        
-        //olhando a existencia do arquivo.
-        if(!nicknameFile.exists()){
-        	controleMenuUsuario(canalComunicacaoControle);
-        }else{
-              try{
+        File nicknameFile = new File("nickname.txt");        
+        try{
                   FileReader arq = new FileReader(nicknameFile);
                   BufferedReader lerArq = new BufferedReader(arq);
                   nickname = lerArq.readLine();
                   arq.close();
           }catch(Exception e){
-        	//nao mostra o erro. 	
+        	
+        	  System.out.println("Nao foi possivel, inicializar com o nickname. Tente mais tarde.");       	  
           }
-        }
-        
-        return nickname;
-      }
+        }       
     
     //Leiloeiro->Controle cadastrar item.
     private boolean cadastrarItem()
