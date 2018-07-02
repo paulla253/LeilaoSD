@@ -88,10 +88,10 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         canalDeComunicacao.connect("XxXLeilao");
         
         //recuperar secao.
-        if(nicknameFile.exists()){
-        	System.out.println("Arquivo existe");
-        	recuperarSecao();
-        }
+       // if(nicknameFile.exists()){
+       // 	System.out.println("Arquivo existe");
+       // 	recuperarSecao();
+        //}
 
            eventLoop();
         canalDeComunicacao.close();
