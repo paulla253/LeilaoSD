@@ -479,7 +479,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler,Serializ
 	    //exibe alterações na composição do grupo
         // se entrou ou saiu alguem do Jchannel
         // se o coordenador morrer, deve eleger um novo.
-        System.out.println("\t** nova View do cluster: " + new_view);
+        //System.out.println("\t** nova View do cluster: " + new_view);
     }
  
   

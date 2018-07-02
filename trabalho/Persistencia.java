@@ -316,7 +316,7 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler, Ser
     }
 
       public void viewAccepted(View new_view) {
-            System.out.println("\t** nova View do cluster: " + new_view);
+            //System.out.println("\t** nova View do cluster: " + new_view);
         }
     
 }
