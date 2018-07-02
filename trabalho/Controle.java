@@ -280,6 +280,31 @@ public class Controle extends ReceiverAdapter implements RequestHandler,Serializ
 			}
 	  	}
 	  	
+    	// 30 - Pedir historico do leilao que esta acontecendo
+    	if(pergunta.getTipo()==30)
+    	{
+    		System.out.println("Pedir historico do leilao que esta acontecendo");
+	  		for (ControleSala sala : state.controleSala) {
+	  			
+	  			if(pergunta.getConteudo().equals(sala.getItem()))
+	  			{
+	  				System.out.println(sala.getHistorico());
+	  				return sala.getHistorico();
+	  			}
+			}
+	  		
+	  		return ("Não achou!");
+    	}
+	  	
+    	// 15 - Pedir item ganhadores
+    	if(pergunta.getTipo()==15)
+    	{
+    	    System.out.println("Pedir item ganhadores."); 
+    	    String histo=pedirHistorico();
+    	    System.out.println("Historico : "+histo); 
+    	    return histo;
+    	}
+	  	
     	//16=Cadastrar ganhador, deve ser repassado para o modelo)=================MODELO===================
     	if(pergunta.getTipo()==16)
     	{  		
