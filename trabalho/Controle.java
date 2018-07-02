@@ -193,13 +193,16 @@ public class Controle extends ReceiverAdapter implements RequestHandler,Serializ
       
       while (sincronizando) {
     	  Util.sleep(100);
-      }
-      
+      }      
 	  	//10=Criar Novo Usuario =================MODELO===================.
 	  	if(pergunta.getTipo()==10)
 	  	{	
 	  	    System.out.println("Novo usuario "+pergunta.getConteudo()+"Senha "+pergunta.getConteudoExtra());	  	    	  	    
-	  	    return "y";
+	  	    pergunta.setTipo(20);
+	  	    if(cadastrarUsuario(pergunta))
+	  	    	return "y";
+	  	    else
+	  	    	return "n";
 	  	}
       
 	  	//11=Logar usuario =================MODELO===================.
@@ -321,6 +324,33 @@ public class Controle extends ReceiverAdapter implements RequestHandler,Serializ
     	Util.sleep(1000);
     	
         return null;
+    }
+    
+    //cadastrarUsuario.
+    private boolean cadastrarUsuario(Protocolo prot1)
+    {
+    	boolean resp=false;
+    	
+        try {          	 
+     	    JChannel canalDeComunicacaoControle=new JChannel();
+    	    canalDeComunicacaoControle.connect("XxXPersistencia");
+    	    canalDeComunicacaoControle.setReceiver(this);
+    	    MessageDispatcher  despachante0=new MessageDispatcher(canalDeComunicacaoControle, null, null, this);  
+        	    	 
+            String resposta=enviaMulticastFirst(prot1, despachante0).getFirst().toString();
+            
+            if(resposta.contains("y"))
+            {
+                resp= true;
+            }
+             
+             canalDeComunicacaoControle.close();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	        
+	        return resp;
     }
         
     //registrarGanhador.

@@ -36,9 +36,6 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler, Ser
     }
 
     private void eventLoop() throws Exception {   
-        
-    	
-    	
     	
     	try {
         	Protocolo prot=new Protocolo();
@@ -52,7 +49,6 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler, Ser
                 System.err.println( "ERRO: " + e.toString() );
             }
     	
-   	
     	sincronizando=true;
 
     	estado = new State();

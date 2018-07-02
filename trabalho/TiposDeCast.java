@@ -2,8 +2,10 @@ import org.jgroups.*;
 import org.jgroups.blocks.*;
 import org.jgroups.util.*;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.*;
 
 public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
@@ -53,7 +55,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 	    
 	    nickname=canalDeComunicacaoControle.getName();
 	    
-        	File nicknameFile = new File("nickname.txt");
+        	File nicknameFile = new File("nicknameUser.txt");
 
 	        //olhando a existencia do arquivo.
 	        if(!nicknameFile.exists()){
@@ -114,19 +116,16 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
             		System.out.println(historicoLeilao());
                 break;
             case 4:
-            		boolean success = (new File("nickname.txt")).delete();           	
+            		boolean success = (new File("nicknameUser.txt")).delete();           	
             		if(success)
             		{
-            			System.out.println("Deslogado com sucesso.Inicie o aplicativo Novamente");
-            			
+            			System.out.println("Deslogado com sucesso.Inicie o aplicativo Novamente");	
             		}
             		else
             			
             			System.out.println("Aconteceu um erro, tente novamente mais tarde");
             		op=5;
-            	break;
-                
-                
+            	break;               
 	        }	    
 	     }
     }
@@ -141,7 +140,12 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 	    	
 	        switch (op) {
             case 1:
-            		criarUsuario();
+            		if(criarUsuario())
+            		{
+            			op=3;
+            			criaArquivoNickname();
+            		}
+            			
                 break;
             case 2:
             		op=logarUsuario(canalComunicacaoControle);
@@ -193,12 +197,13 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 		     
 			 if(resp.contains("y"))
 			 {
-					System.out.println("Recebi y");
-					certo= true;
+					System.out.println("Usuario Cadastrado com sucesso.");
+					nickname=prot1.getConteudo();
+					certo=true;
 			 }
 			 else
 			 {
-					System.out.println("Usuario ou senha estão errados.Tente novamente");
+					System.out.println("Usuario Indisponivel");
 			 }
 
              canalDeComunicacaoControle.close();
@@ -210,6 +215,22 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 		}
         
         return certo;  
+    }
+    
+   
+    
+    public void criaArquivoNickname()
+    {
+      File nicknameFile = new File("nicknameUser.txt");            
+      try{
+           BufferedWriter auxout = new BufferedWriter(new FileWriter(nicknameFile));
+           auxout.append(nickname);
+           auxout.close();
+      }catch(Exception e){
+    	  
+      System.out.println();
+
+      } 
     }
     
     private int logarUsuario(JChannel canalComunicacaoControle)
@@ -232,9 +253,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 		  	line=teclado.nextLine();		 
 	        prot1.setConteudoExtra(line);
 	   	
-	        String resp=enviaMulticastFirst(prot1).toString();
-	        
-	        //System.out.println(resp);
+	        String resp=enviaMulticastFirst(prot1).toString();	        
 	        
 			if(resp.contains("y"))
 			{
@@ -298,7 +317,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     
     private void loadNickname(){ 
     	
-        File nicknameFile = new File("nickname.txt");        
+        File nicknameFile = new File("nicknameUser.txt");        
         try{
                   FileReader arq = new FileReader(nicknameFile);
                   BufferedReader lerArq = new BufferedReader(arq);
