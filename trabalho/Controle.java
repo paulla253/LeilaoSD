@@ -199,21 +199,25 @@ public class Controle extends ReceiverAdapter implements RequestHandler,Serializ
 	  	{	
 	  	    System.out.println("Novo usuario "+pergunta.getConteudo()+"Senha "+pergunta.getConteudoExtra());	  	    	  	    
 	  	    pergunta.setTipo(20);
-	  	    if(cadastrarUsuario(pergunta))
+	  	    if(cadastrarUsuarioOUlogar(pergunta))
 	  	    	return "y";
 	  	    else
 	  	    	return "n";
 	  	}
       
-	  	//11=Logar usuario =================MODELO===================.
+	  	//11=Logar usuario
 	  	if(pergunta.getTipo()==11)
 	  	{
 	  	    System.out.println("Logar usuario "+pergunta.getConteudo()+"Senha "+pergunta.getConteudoExtra());    						
-	  	    return "y";
+	  	    pergunta.setTipo(21);
+	  	    if(cadastrarUsuarioOUlogar(pergunta))
+	  	    	return "y";
+	  	    else
+	  	    	return "n";
 	  	}
 	  	
 	  	//12=Criar sala(item com o leilao)
-	  	if(pergunta.getTipo()==12)
+	  	if(pergunta.getTipo()==21)
 	  	{
 	  		ControleSala controle= new ControleSala(pergunta.getConteudo(),msg.src().toString());
 	  		if(msg.src().equals(canalDeComunicacao.getView().getMembers().get(0)))
@@ -326,8 +330,8 @@ public class Controle extends ReceiverAdapter implements RequestHandler,Serializ
         return null;
     }
     
-    //cadastrarUsuario.
-    private boolean cadastrarUsuario(Protocolo prot1)
+    //cadastrarUsuario ou logar usuario.
+    private boolean cadastrarUsuarioOUlogar(Protocolo prot1)
     {
     	boolean resp=false;
     	
@@ -351,15 +355,12 @@ public class Controle extends ReceiverAdapter implements RequestHandler,Serializ
 			}
 	        
 	        return resp;
-    }
-    
-    
+    } 
         
     //registrarGanhador.
     private boolean registrarGanhador(String ganhador,String lance,String item)
     {
-    	boolean resp=false;
-    	
+    	boolean resp=false;   	
         try {          	 
      	    JChannel canalDeComunicacaoControle=new JChannel();
     	    canalDeComunicacaoControle.connect("XxXPersistencia");
