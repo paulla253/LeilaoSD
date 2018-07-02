@@ -195,6 +195,13 @@ public class Controle extends ReceiverAdapter implements RequestHandler,Serializ
     	  Util.sleep(100);
       }
       
+	  	//10=Criar Novo Usuario =================MODELO===================.
+	  	if(pergunta.getTipo()==10)
+	  	{	
+	  	    System.out.println("Novo usuario "+pergunta.getConteudo()+"Senha "+pergunta.getConteudoExtra());	  	    	  	    
+	  	    return "y";
+	  	}
+      
 	  	//11=Logar usuario =================MODELO===================.
 	  	if(pergunta.getTipo()==11)
 	  	{

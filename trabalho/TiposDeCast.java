@@ -118,10 +118,12 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
             		if(success)
             		{
             			System.out.println("Deslogado com sucesso.Inicie o aplicativo Novamente");
+            			
             		}
             		else
             			
-            			System.out.println("Aconteceu um erro, tente novamente mais tarde");           	
+            			System.out.println("Aconteceu um erro, tente novamente mais tarde");
+            		op=5;
             	break;
                 
                 
@@ -159,9 +161,55 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     }
     
     //---------------------------------------------------------------------------------------
-    private void criarUsuario()
+    private boolean criarUsuario()
     {
-        System.out.println("Criar novo usuario: ");
+    	boolean certo=false;    	
+        System.out.println("Criar novo usuario ... ");
+
+        try {
+        	
+     	    JChannel canalDeComunicacaoControle=new JChannel();
+     	    canalDeComunicacaoControle.setName(nickname);
+    	    canalDeComunicacaoControle.connect("XxXControle");
+    	    canalDeComunicacaoControle.setReceiver(this);
+    	    despachante=new MessageDispatcher(canalDeComunicacaoControle, null, null, this);  
+  
+		     Protocolo prot1=new Protocolo();   
+	         //critenciais deveriam está certa.
+	         prot1.setResposta(false);
+	         prot1.setTipo(10);
+	         
+			 System.out.println("Digite o nome do usuario");
+			 String line = "";  
+			 line=teclado.nextLine();		 
+		     prot1.setConteudo(line);
+		        
+			 System.out.println("Digite a senha do usuario");
+			 line = "";  
+			 line=teclado.nextLine();		 
+		     prot1.setConteudoExtra(line);
+        	    	 
+		     String resp=enviaUnicast(canalDeComunicacaoControle.getView().getMembers().get(0),(prot1));
+		     
+			 if(resp.contains("y"))
+			 {
+					System.out.println("Recebi y");
+					certo= true;
+			 }
+			 else
+			 {
+					System.out.println("Usuario ou senha estão errados.Tente novamente");
+			 }
+
+             canalDeComunicacaoControle.close();
+             despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);
+    	        
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
+        return certo;  
     }
     
     private int logarUsuario(JChannel canalComunicacaoControle)
