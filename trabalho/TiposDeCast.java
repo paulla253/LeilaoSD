@@ -44,11 +44,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 
     private void start() throws Exception
     {
-	    JChannel canalDeComunicacaoControle=new JChannel();
-	    
-        //carregando o nome do usuario.
-       // loadNickname(canalDeComunicacaoControle);
-	    
+	    JChannel canalDeComunicacaoControle=new JChannel();	        
 	    canalDeComunicacaoControle.connect("XxXControle");
 	    canalDeComunicacaoControle.setReceiver(this);
 	    despachante=new MessageDispatcher(canalDeComunicacaoControle, null, null, this);
@@ -148,7 +144,11 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
             			
                 break;
             case 2:
-            		op=logarUsuario(canalComunicacaoControle);
+	        		if(logarUsuario(canalComunicacaoControle))
+	        		{
+	        			op=3;
+	        			criaArquivoNickname();
+	        		}           	
                 break;
 	        }	    
 	     }
@@ -170,8 +170,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     	boolean certo=false;    	
         System.out.println("Criar novo usuario ... ");
 
-        try {
-        	
+        try {     	
      	    JChannel canalDeComunicacaoControle=new JChannel();
      	    canalDeComunicacaoControle.setName(nickname);
     	    canalDeComunicacaoControle.connect("XxXControle");
@@ -233,44 +232,55 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
       } 
     }
     
-    private int logarUsuario(JChannel canalComunicacaoControle)
+    private boolean logarUsuario(JChannel canalComunicacaoControle)
     {
-        System.out.println("Logar usuario: ");
-        
-        try {
+    	boolean certo=false;    	
+        System.out.println("Logar usuario ... ");
+
+        try {     	
+     	    JChannel canalDeComunicacaoControle=new JChannel();
+     	    canalDeComunicacaoControle.setName(nickname);
+    	    canalDeComunicacaoControle.connect("XxXControle");
+    	    canalDeComunicacaoControle.setReceiver(this);
+    	    despachante=new MessageDispatcher(canalDeComunicacaoControle, null, null, this);  
+  
 		     Protocolo prot1=new Protocolo();   
 	         //critenciais deveriam está certa.
 	         prot1.setResposta(false);
 	         prot1.setTipo(11);
-        	
-		    System.out.println("Digite o nome do usuario");
-			String line = "";  
-		  	line=teclado.nextLine();		 
-	        prot1.setConteudo(line);
-	        
-		    System.out.println("Digite a senha do usuario");
-			line = "";  
-		  	line=teclado.nextLine();		 
-	        prot1.setConteudoExtra(line);
-	   	
-	        String resp=enviaMulticastFirst(prot1).toString();	        
-	        
-			if(resp.contains("y"))
-			{
-				System.out.println("Recebi y");
-		        return 3;
-			}
-			else
-			{
-				System.out.println("Usuario ou senha estão errados.Tente novamente");
-			}
-				        	        
+	         
+			 System.out.println("Digite o nome do usuario");
+			 String line = "";  
+			 line=teclado.nextLine();		 
+		     prot1.setConteudo(line);
+		        
+			 System.out.println("Digite a senha do usuario");
+			 line = "";  
+			 line=teclado.nextLine();		 
+		     prot1.setConteudoExtra(line);
+        	    	 
+		     String resp=enviaUnicast(canalDeComunicacaoControle.getView().getMembers().get(0),(prot1));
+		     
+			 if(resp.contains("y"))
+			 {
+					System.out.println("Login efetuado com sucesso");
+					nickname=prot1.getConteudo();
+					certo=true;
+			 }
+			 else
+			 {
+					System.out.println("Erro.Por favor tente mais tarde.");
+			 }
+
+             canalDeComunicacaoControle.close();
+             despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);
+             
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
         
-        return 1;
+        return certo;  
     }
     
     //menu criado.
@@ -315,8 +325,8 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         return resp;
     }
     
-    private void loadNickname(){ 
-    	
+    private void loadNickname()
+    { 	
         File nicknameFile = new File("nicknameUser.txt");        
         try{
                   FileReader arq = new FileReader(nicknameFile);
@@ -327,7 +337,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         	
         	  System.out.println("Nao foi possivel, inicializar com o nickname. Tente mais tarde.");       	  
           }
-        }       
+   }       
     
     //Leiloeiro->Controle cadastrar item.
     private boolean cadastrarItem()

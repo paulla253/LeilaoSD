@@ -194,7 +194,7 @@ public class Controle extends ReceiverAdapter implements RequestHandler,Serializ
       while (sincronizando) {
     	  Util.sleep(100);
       }      
-	  	//10=Criar Novo Usuario =================MODELO===================.
+	  	//10=Criar Novo Usuario
 	  	if(pergunta.getTipo()==10)
 	  	{	
 	  	    System.out.println("Novo usuario "+pergunta.getConteudo()+"Senha "+pergunta.getConteudoExtra());	  	    	  	    
@@ -352,6 +352,8 @@ public class Controle extends ReceiverAdapter implements RequestHandler,Serializ
 	        
 	        return resp;
     }
+    
+    
         
     //registrarGanhador.
     private boolean registrarGanhador(String ganhador,String lance,String item)
