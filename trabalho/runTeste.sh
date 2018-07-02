@@ -9,4 +9,4 @@ bash compila-e-executaControle.sh
 
 sleep 3
 
-bash compila-e-executa.sh
+bash compila-e-executaVisao.sh

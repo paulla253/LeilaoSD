@@ -8,7 +8,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.*;
 
-public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
+public class Visao extends ReceiverAdapter implements RequestHandler {
 
     JChannel canalDeComunicacao;
     MessageDispatcher  despachante;
@@ -42,7 +42,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     String historico= "[Historico]";
  
     public static void main(String[] args) throws Exception {
-        new TiposDeCast().start();
+        new Visao().start();
     }
 
     private void start() throws Exception

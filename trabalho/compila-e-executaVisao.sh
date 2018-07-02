@@ -8,10 +8,10 @@ LIBS=../lib/jgroups-3.6.4.Final.jar:./
 export CLASSPATH=$CLASSPATH:$LIBS
 
 javac Protocolo.java
-javac TiposDeCast.java
+javac Visao.java
 
 
-RUN_CMD="java $CONFIG -cp $LIBS TiposDeCast 2>/dev/null"
+RUN_CMD="java $CONFIG -cp $LIBS Visao 2>/dev/null"
 echo "$RUN_CMD"
 
 ## executar 1 processo neste computador
