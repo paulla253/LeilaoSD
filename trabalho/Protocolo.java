@@ -21,11 +21,11 @@ public class Protocolo implements Serializable {
     //11=Logar com o usuario
     //12=Criar sala(item com o leilao)
     //13=Registra log (historico)
-    //14=Restaura log (Quandor cair)
     //15=Listar itens ganhadores(Historico).
     //16=Registrar Ganhador.
     //17=usuario online.
-    //30= pedir historico
+    //30=pedir historico
+    //90=Sincronizar Controle
     
 
     public String getConteudo() {
