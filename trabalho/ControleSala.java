@@ -6,7 +6,7 @@ public class ControleSala implements Serializable{
     private String usuario;
     private String item;
     private String leiloeiro;
-    private String historico="Historico";
+    private String historico="[Historico]";
     
     public String getHistorico() {
 		return historico;

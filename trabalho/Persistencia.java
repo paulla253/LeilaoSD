@@ -25,7 +25,7 @@ public class Persistencia extends ReceiverAdapter implements RequestHandler, Ser
     }
 
     private void start() throws Exception {
-        canalDeComunicacao = new JChannel();
+        canalDeComunicacao = new JChannel("teste.xml");
         canalDeComunicacao.setReceiver(this);
         
         despachante = new MessageDispatcher(canalDeComunicacao, null, null, this);

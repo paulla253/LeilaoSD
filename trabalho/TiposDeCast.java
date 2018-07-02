@@ -37,6 +37,9 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     
     //item a ser leiloado   
     String codigo="";
+    
+    //guardar historico.
+    String historico= "[Historico]";
  
     public static void main(String[] args) throws Exception {
         new TiposDeCast().start();
@@ -44,7 +47,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 
     private void start() throws Exception
     {
-	    JChannel canalDeComunicacaoControle=new JChannel();	        
+	    JChannel canalDeComunicacaoControle=new JChannel("teste.xml");	        
 	    canalDeComunicacaoControle.connect("XxXControle");
 	    canalDeComunicacaoControle.setReceiver(this);
 	    despachante=new MessageDispatcher(canalDeComunicacaoControle, null, null, this);
@@ -77,14 +80,14 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 	    canalDeComunicacaoControle.close();	    
 	    
         //Cria o canal de comunicação com uma configuração padrão do JGroups	    
-	    canalDeComunicacao=new JChannel();
+	    canalDeComunicacao=new JChannel("teste.xml");
 	    canalDeComunicacao.setName(nickname);
         canalDeComunicacao.setReceiver(this);
         despachante=new MessageDispatcher(canalDeComunicacao, null, null, this);  
         
         canalDeComunicacao.connect("XxXLeilao");
         
-        //olhando a existencia do arquivo.
+        //recuperar secao.
         if(nicknameFile.exists()){
         	System.out.println("Arquivo existe");
         	recuperarSecao();
@@ -178,7 +181,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         System.out.println("Criar novo usuario ... ");
 
         try {     	
-     	    JChannel canalDeComunicacaoControle=new JChannel();
+     	    JChannel canalDeComunicacaoControle=new JChannel("teste.xml");
      	    canalDeComunicacaoControle.setName(nickname);
     	    canalDeComunicacaoControle.connect("XxXControle");
     	    canalDeComunicacaoControle.setReceiver(this);
@@ -223,8 +226,6 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         return certo;  
     }
     
-   
-    
     public void criaArquivoNickname()
     {
       File nicknameFile = new File("nicknameUser.txt");            
@@ -245,7 +246,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
         System.out.println("Logar usuario ... ");
 
         try {     	
-     	    JChannel canalDeComunicacaoControle=new JChannel();
+     	    JChannel canalDeComunicacaoControle=new JChannel("teste.xml");
      	    canalDeComunicacaoControle.setName(nickname);
     	    canalDeComunicacaoControle.connect("XxXControle");
     	    canalDeComunicacaoControle.setReceiver(this);
@@ -308,7 +309,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     	String resp="";
         try {
        	 
-     	    JChannel canalDeComunicacaoControle=new JChannel();
+     	    JChannel canalDeComunicacaoControle=new JChannel("teste.xml");
      	    canalDeComunicacaoControle.setName(nickname);
     	    canalDeComunicacaoControle.connect("XxXControle");
     	    canalDeComunicacaoControle.setReceiver(this);
@@ -355,7 +356,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 	   		    String line = "";  
 	   	  		line=teclado.nextLine();
 	       	 
-	     	    JChannel canalDeComunicacaoControle=new JChannel();
+	     	    JChannel canalDeComunicacaoControle=new JChannel("teste.xml");
 	     	    canalDeComunicacaoControle.setName(nickname);
 	    	    canalDeComunicacaoControle.connect("XxXControle");
 	    	    canalDeComunicacaoControle.setReceiver(this);
@@ -389,7 +390,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     private void registrarLog(String ganhador,String lance)
     {
 	        try {	        	 
-	     	    JChannel canalDeComunicacaoControle=new JChannel();
+	     	    JChannel canalDeComunicacaoControle=new JChannel("teste.xml");
 	     	    canalDeComunicacaoControle.setName(nickname);
 	    	    canalDeComunicacaoControle.connect("XxXControle");
 	    	    canalDeComunicacaoControle.setReceiver(this);
@@ -414,7 +415,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     private void cadastrarGanhadorLeilao(Address ganhador, float lance)
     {
         try {       	
-     	    JChannel canalDeComunicacaoControle=new JChannel();
+     	    JChannel canalDeComunicacaoControle=new JChannel("teste.xml");
      	    canalDeComunicacaoControle.setName(nickname);
     	    canalDeComunicacaoControle.connect("XxXControle");
     	    canalDeComunicacaoControle.setReceiver(this);
@@ -465,6 +466,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 		                		lance=NOVO_LANCE;
 		                		ganhador=NOVO_GANHADOR;
 		                		
+		                		historico=historico+"\n Ganhador"+ganhador+" Lance : "+Float.toString(lance);
 		                		registrarLog(ganhador.toString(),Float.toString(lance));
 		                		
 		                        prot.setConteudo("Valor atual "+lance+"com o usuario"+ganhador);
@@ -528,14 +530,9 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
 						//composicao do JChannel.
 						Vector<Address> cluster = new Vector<Address>(canalDeComunicacao.getView().getMembers());
 						
-						RspList resp = enviaMulticast(prot);
+						String resp = enviaMulticastFirst(prot).toString();
 						
-						
-		                for (int i = 0; i < cluster.size(); i++)
-		                {
-		                	 System.out.println("ID : "+cluster.elementAt(i)+" Valor:"+resp.getValue(cluster.elementAt(i)));
-		                }
-		               
+						System.out.println(resp);
 
                 }catch(Exception e) {
                         System.err.println( "ERRO: " + e.toString() );
@@ -701,7 +698,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     
     	//11-Logar com um usuario já existente,deve responder null
     	//(Controle que tem conexão com o modelo,ficará responsavel por essa parte).
-    	if (pergunta.getTipo()==11 && pergunta.getTipo()==12 && pergunta.getTipo()==15 && pergunta.getTipo()==16)
+    	if (pergunta.getTipo()==11 && pergunta.getTipo()==12 && pergunta.getTipo()==15 && pergunta.getTipo()==16 && pergunta.getTipo()==30)
     	{
     		Util.sleep(1000);
     		return null;     		
@@ -717,11 +714,13 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
     			{
             		if(address.toString().equals(msg.src().toString()))
             		{
-            				return "y";
+            				System.out.println("Encontrei historico");
+            				System.out.println(historico);
+            				return historico;
             		}	
 				}
-    		Util.sleep(100);
-    		return "n";     		
+    		Util.sleep(1000);
+    		return "Nao posso historico.";     		
     	}
       
     	//Diferenciar lance de outras mensagens,lance==1
@@ -778,7 +777,7 @@ public class TiposDeCast extends ReceiverAdapter implements RequestHandler {
       	}
   		
         return prot;
-    }
+    }   
 
   public void viewAccepted(View new_view) {
 	    //exibe alterações na composição do grupo
