@@ -2,14 +2,10 @@
 
 Ana Paula Fernandes de Souza
 Luiz Eduardo Pereira
-
-	Optamos por utilizar o padrão MVC (Modelo – Visão – Controle) para deixar o código dividido em camadas para melhor organização e desempenho.
-	As três camadas são compiladas separadamente/ou em computadores diferentes.
-    Foi disponibilizado também um script em bash para executar as três automaticamente.
-
-    Visão : compila-e-executaVisao.sh
-    Controle : compila-e-executaControle.sh
-    Modelo : compila-e-executa-Persistencia.sh
+Disciplina : Sistema Distribuído
+Professor : Everthon Valadão
+Faculdade : Instituto Federal de Minas Gerais Campus Formiga(IFMG)
+Atualização : 09/07/2018
 
 # Funcionamento:
 
@@ -22,9 +18,17 @@ valor para um determinado item será considerado como vencedor, passando o item 
 do usuário que enviou o lance vencedor. Observe que NÃO poderá haver dois vencedores de um mesmo
 leilão, bem como um mesmo item NÃO poderá ser leiloado "simultaneamente" em dois ou mais leilões.
 
+# Executar : 
+
+Trabalho com o padrão de projeto MVC (Modelo – Visão – Controle):
+
+Visão : compila-e-executaVisao.sh
+Controle : compila-e-executaControle.sh
+Modelo : compila-e-executa-Persistencia.sh
 
 
-# Melhoria do trabalho : 
+
+# Possíveis melhorias no trabalho  : 
 
 1) Criar arquivo do xml para a visao,controle,modelo otimizado para cada estrutura.
 
