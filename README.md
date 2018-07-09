@@ -1,11 +1,11 @@
 # LeilaoSD
 
-Ana Paula Fernandes de Souza
-Luiz Eduardo Pereira
-Disciplina : Sistema Distribuído
-Professor : Everthon Valadão
-Faculdade : Instituto Federal de Minas Gerais Campus Formiga(IFMG)
-Atualização : 09/07/2018
+Ana Paula Fernandes de Souza<br>
+Luiz Eduardo Pereira<br />
+Disciplina : Sistema Distribuído<br />
+Professor : Everthon Valadão<br />
+Faculdade : Instituto Federal de Minas Gerais Campus Formiga(IFMG)<br />
+Atualização : 09/07/2018<br />
 
 # Funcionamento:
 
@@ -22,9 +22,9 @@ leilão, bem como um mesmo item NÃO poderá ser leiloado "simultaneamente" em d
 
 Trabalho com o padrão de projeto MVC (Modelo – Visão – Controle):
 
-Visão : compila-e-executaVisao.sh
-Controle : compila-e-executaControle.sh
-Modelo : compila-e-executa-Persistencia.sh
+Visão : compila-e-executaVisao.sh<br />
+Controle : compila-e-executaControle.sh<br />
+Modelo : compila-e-executa-Persistencia.sh<br />
 
 
 
