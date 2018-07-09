@@ -596,20 +596,6 @@ public class Visao extends ReceiverAdapter implements RequestHandler {
                     }
             }          
     }
-
-    private RspList enviaMulticast(Protocolo conteudo) throws Exception{
-        System.out.println("\nENVIEI a pergunta: " + conteudo.getConteudo());
-
-        Address cluster = null; //endereço null significa TODOS os membros do cluster
-        Message mensagem=new Message(cluster, conteudo);
-
-        RequestOptions opcoes = new RequestOptions();
-          opcoes.setMode(ResponseMode.GET_ALL); // espera receber a resposta de TODOS membros (ALL, MAJORITY, FIRST, NONE)
-          opcoes.setAnycasting(false);
-
-        RspList respList = despachante.castMessage(null, mensagem, opcoes); //MULTICAST
-        return respList;
-    }
     
     private RspList enviaMulticastFirst(Protocolo conteudo) throws Exception{
         System.out.println("\nENVIEI a pergunta: " + conteudo.getConteudo());
@@ -637,23 +623,6 @@ public class Visao extends ReceiverAdapter implements RequestHandler {
           
         despachante.castMessage(null, mensagem, opcoes); //MULTICAST
     }
-
-    private RspList enviaAnycast(Collection<Address> grupo, String conteudo) throws Exception{
-        System.out.println("\nENVIEI a pergunta: " + conteudo);
-
-        Message mensagem=new Message(null, "{ ANYCAST } " + conteudo); //apesar do endereço ser null, se as opcoes contiverem anycasting==true enviará somente aos destinos listados
-
-        RequestOptions opcoes = new RequestOptions();
-          opcoes.setMode(ResponseMode.GET_MAJORITY); // espera receber a resposta da maioria do grupo (ALL, MAJORITY, FIRST, NONE)
-          opcoes.setAnycasting(true);
-        
-        despachante=new MessageDispatcher(canalDeComunicacao, null, this, this);   
-        RspList respList = despachante.castMessage(grupo, mensagem, opcoes); //ANYCAST
-        System.out.println("==> Respostas do grupo ao ANYCAST:\n" +respList+"\n");
-
-        return respList;
-    }
-
         private void enviaAnycastNone(Collection<Address> grupo, Protocolo conteudo) throws Exception{
         System.out.println("\nENVIEI o lance: " + conteudo.getConteudo());
 
